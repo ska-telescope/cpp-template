@@ -4,24 +4,68 @@
 # see https://hub.docker.com/_/gcc/
 image: gcc
 
-build:
+stages:
+  - build
+  - lint
+  - test
+
+build_debug:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
-  # before_script:
-  #   - apt update && apt -y install make autoconf
+  before_script:
+    - apt update && apt -y install cmake
   script:
     - mkdir build
     - cd build
-    - cmake ../
-    - make     
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug
+    - make
   artifacts:
     paths:
+      - build/src/src/top/nested/libHelloWorld.a
       - build/src/apps/HelloWorld
       # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
       # cache:
       #   paths:
       #     - "*.o"
+
+build_release:
+  stage: build
+  # instead of calling g++ directly you can also use some build toolkit like make
+  # install the necessary build tools when needed
+  before_script:
+    - apt update && apt -y install cmake
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - make
+  artifacts:
+    paths:
+      - build/src/src/top/nested/libHelloWorld.a
+      - build/src/apps/HelloWorld
+      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+      # cache:
+      #   paths:
+      #     - "*.o"
+
+lint_clang_tidy:
+ stage: lint
+ script:
+    - apt update && apt -y install clang++-4.0 clang-tidy-4.0 cmake
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++-4.0
+    - run-clang-tidy-4.0.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
+
+lint_iwyu:
+ stage: lint
+ script:
+    - apt update && apt -y install iwyu cmake clang++-4.0
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++-4.0
+    - iwyu_tool -p .
 
 # run tests using the binary built before
 #test:
