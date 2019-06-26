@@ -8,7 +8,7 @@
 namespace top {
 namespace nested {
 
-class wave : hello {
+class wave : public hello {
   public:
   wave();
   ~wave();
