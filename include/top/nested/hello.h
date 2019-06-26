@@ -13,7 +13,7 @@ class hello {
     virtual void greeting() = 0;
 
 };
-} // nested
-} // top
+} // namespace nested
+} // namespace top
 #endif
 

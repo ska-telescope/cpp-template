@@ -10,5 +10,5 @@ hello::hello() {
 hello::~hello() {
   std::cout << "The default destructor for a hello" << std::endl;
 }
-} // nested
-} // top
+} // namespace nested
+} // namespace top

@@ -14,6 +14,6 @@ wave::~wave() {
 }
 void wave::greeting() {
   std::cout << "I am waving hello" << std::endl;
-}  
-} // nested
-} // top
+}
+} // namespace nested
+} // namespace top

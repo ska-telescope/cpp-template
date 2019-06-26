@@ -15,8 +15,8 @@ class wave : hello {
 
   virtual void greeting();
 };
-} // nested
-} // top
+} // namespace nested
+} // namespace top
 
 #endif
 
