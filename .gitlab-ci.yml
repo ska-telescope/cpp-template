@@ -11,18 +11,20 @@ build:
   # before_script:
   #   - apt update && apt -y install make autoconf
   script:
-    - cd apps      
-    - g++ hello_world.cc -o mybinary
+    - mkdir build
+    - cd build
+    - cmake ../
+    - make     
   artifacts:
     paths:
-      - apps/mybinary
+      - build/src/apps/HelloWorld
       # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
       # cache:
       #   paths:
       #     - "*.o"
 
 # run tests using the binary built before
-test:
-  stage: test
-  script:
-    - ./runmytests.sh
+#test:
+#  stage: test
+#  script:
+#    - ./runmytests.sh
