@@ -26,10 +26,11 @@ configure_file (
 	"${PROJECT_SOURCE_DIR}/HelloWorldConfig.h.in"
 	"${PROJECT_BINARY_DIR}/HelloWorldConfig.h"
   )
+include_directories("${PROJECT_BINARY_DIR}")
 
 #LIBRARIES
-include_directories ("${PROJECT_SOURCE_DIR}/top-namespace/nested-namespace/") # should not be needed
-add_subdirectory (src/top-namespace/nested-namespace)
+include_directories ("${PROJECT_SOURCE_DIR}/include") # should not be needed
+add_subdirectory (src/top/nested)
 
 #EXECUTEABLES
 add_subdirectory(src/apps)
