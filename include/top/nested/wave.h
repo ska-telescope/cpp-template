@@ -13,7 +13,7 @@ class wave : public hello {
   wave();
   ~wave();
 
-  virtual void greeting();
+  void greeting() override;
 };
 } // namespace nested
 } // namespace top
