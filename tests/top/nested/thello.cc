@@ -1,21 +1,21 @@
 //! Boilerplate tests from the GoogleTests package
 
-#include "top-namespace/nested-namespace/hello.h" // The class I am testing
+#include "top/nested/wave.h" // The class I am testing
 #include "gtest/gtest.h" // the googletest framework
 
 namespace {
 
 // The fixture for testing class Foo.
-class HelloTest : public ::testing::Test {
+class WaveTest : public ::testing::Test {
  protected:
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  HelloTest() {
+  WaveTest() {
      // You can do set-up work for each test here.
   }
 
-  ~HelloTest() override {
+  ~WaveTest() override {
      // You can do clean-up work that doesn't throw exceptions here.
   }
 
@@ -35,16 +35,16 @@ class HelloTest : public ::testing::Test {
   // Objects declared here can be used by all tests in the test suite for Foo.
 };
 
-// Tests that the Foo::Bar() method does Abc.
-TEST_F(FooTest, MethodBarDoesAbc) {
+// Tests that the Wave::Bar() method does Abc.
+TEST_F(WaveTest, MethodBarDoesAbc) {
   const std::string input_filepath = "this/package/testdata/myinputfile.dat";
   const std::string output_filepath = "this/package/testdata/myoutputfile.dat";
-  Foo f;
+  Wave f;
   EXPECT_EQ(f.Bar(input_filepath, output_filepath), 0);
 }
 
 // Tests that Foo does Xyz.
-TEST_F(FooTest, DoesXyz) {
+TEST_F(WaveTest, DoesXyz) {
   // Exercises the Xyz feature of Foo.
 }
 
