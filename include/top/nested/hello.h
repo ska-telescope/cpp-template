@@ -6,7 +6,7 @@ namespace nested {
 
 class hello {
 
-  public:	
+  public:
     hello();
     ~hello();
 

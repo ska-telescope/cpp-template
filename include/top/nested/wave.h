@@ -3,7 +3,7 @@
 
 // include the header instead of the forward declaration ?
 //
-#include "top/nested/hello.h" 
+#include "top/nested/hello.h"
 
 namespace top {
 namespace nested {
