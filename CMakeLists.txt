@@ -1,35 +1,22 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(HelloWorld)
+file(STRINGS version.txt HelloWorld_VERSION)
+message(STATUS "Building HelloWorld version ${HelloWorld_VERSION}")
 
-file(READ "version.txt" ver)
-
-string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
-set(ver_major ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
-set(ver_minor ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "VERSION_PATCH ([0-9]*)" _ ${ver})
-set(ver_patch ${CMAKE_MATCH_1})
-
-message("version: ${ver_major}.${ver_minor}.${ver_patch}")
-
-# The version number.
-set (HelloWorld_VERSION_MAJOR ${ver_major})
-set (HelloWorld_VERSION_MINOR ${ver_minor})
-set (HelloWorld_VERSION_PATCH ${ver_patch})
+project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 
 # configure a header file to pass some of the CMake settings
 # to the source code
-configure_file (
-	"${PROJECT_SOURCE_DIR}/HelloWorldConfig.h.in"
-	"${PROJECT_BINARY_DIR}/HelloWorldConfig.h"
-  )
-include_directories("${PROJECT_BINARY_DIR}")
+configure_file (HelloWorldConfig.h.in HelloWorldConfig.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# The whole project requires C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include_directories(include)
 
 #LIBRARIES
-include_directories ("${PROJECT_SOURCE_DIR}/include") # should not be needed
 add_subdirectory (src/top/nested)
 
 #EXECUTEABLES
