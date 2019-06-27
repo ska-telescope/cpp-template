@@ -1,5 +1,6 @@
 #ifndef TOP_NESTED_HELLO_H
 #define TOP_NESTED_HELLO_H
+#include <string>
 
 namespace top {
 namespace nested {
@@ -10,7 +11,7 @@ class hello {
     hello();
     ~hello();
 
-    virtual void greeting() = 0;
+    virtual std::string greeting() = 0;
 
 };
 } // namespace nested

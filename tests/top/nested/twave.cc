@@ -5,7 +5,7 @@
 
 namespace {
 
-// The fixture for testing class Foo.
+// The fixture for testing class Wave .
 class WaveTest : public ::testing::Test {
  protected:
   // You can remove any or all of the following functions if its body
@@ -35,18 +35,16 @@ class WaveTest : public ::testing::Test {
   // Objects declared here can be used by all tests in the test suite for Foo.
 };
 
-// Tests that the Wave::Bar() method does Abc.
-TEST_F(WaveTest, MethodBarDoesAbc) {
-  const std::string input_filepath = "this/package/testdata/myinputfile.dat";
-  const std::string output_filepath = "this/package/testdata/myoutputfile.dat";
-  Wave f;
-  EXPECT_EQ(f.Bar(input_filepath, output_filepath), 0);
+// Tests that the Wave::greeting() method does what we expect.
+TEST_F(WaveTest, MethodWave) {
+  top::nested::wave f;
+  EXPECT_EQ(f.greeting(),"I am waving hello");
 }
 
 // Tests that Foo does Xyz.
-TEST_F(WaveTest, DoesXyz) {
+// TEST_F(WaveTest, DoesXyz) {
   // Exercises the Xyz feature of Foo.
-}
+// }
 
 }  // namespace
 

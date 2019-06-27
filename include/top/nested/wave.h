@@ -1,6 +1,7 @@
 #ifndef TOP_NESTED_WAVE_H
 #define TOP_NESTED_WAVE_H
 
+#include <string>
 // include the header instead of the forward declaration ?
 //
 #include "top/nested/hello.h"
@@ -13,7 +14,7 @@ class wave : public hello {
   wave();
   ~wave();
 
-  void greeting() override;
+  std::string greeting() override;
 };
 } // namespace nested
 } // namespace top

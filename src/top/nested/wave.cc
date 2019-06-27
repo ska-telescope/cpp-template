@@ -1,5 +1,6 @@
 /// System Includes
 #include <iostream>
+#include <string>
 /// Local Includes
 #include "top/nested/wave.h"
 
@@ -11,8 +12,8 @@ wave::wave() {
 wave::~wave() {
   std::cout << "The derived(virtual) destructor for a wave" << std::endl;
 }
-void wave::greeting() {
-  std::cout << "I am waving hello" << std::endl;
+std::string wave::greeting() {
+  return std::string("I am waving hello");
 }
 } // namespace nested
 } // namespace top
