@@ -44,11 +44,6 @@ build_release:
     paths:
       - build/src/src/top/nested/libHelloWorld.a
       - build/src/apps/HelloWorld
-      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-      # cache:
-      #   paths:
-      #     - "*.o"
-
 lint_clang_tidy:
  stage: lint
  script:
@@ -68,7 +63,16 @@ lint_iwyu:
     - iwyu_tool -p .
 
 # run tests using the binary built before
-#test:
-#  stage: test
-#  script:
-#    - ./runmytests.sh
+#
+test:
+  stage: test
+
+  before_script:
+    - apt update && apt -y install cmake
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - make
+    - make test  
+
