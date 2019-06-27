@@ -24,6 +24,7 @@ build_debug:
     paths:
       - build/src/src/top/nested/libHelloWorld.a
       - build/src/apps/HelloWorld
+      - build/tests/top/nested/twave  
       # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
       # cache:
       #   paths:
@@ -68,11 +69,7 @@ test:
   stage: test
 
   before_script:
-    - apt update && apt -y install cmake
   script:
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release
-    - make
-    - make test  
+    - cd build/tests/top/nested
+    - ./twave
 
