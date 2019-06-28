@@ -27,12 +27,5 @@ add_subdirectory(src/top/nested)
 add_subdirectory(src/apps)
 
 # Tests
-add_subdirectory(tests/top/nested/)
-add_dependencies(twave gtest-install)
-# Link test executable against gtest & gtest_main
 enable_testing()
-
-add_test(
-    NAME twave
-    COMMAND twave
-)
+add_subdirectory(tests/top/nested/)
