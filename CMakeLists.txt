@@ -9,8 +9,13 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Building options
+option(BUILD_TESTS "Build tests" ON)
+
 # External projects
-add_subdirectory(external/gtest-1.8.1 googletest)
+if (BUILD_TESTS)
+	add_subdirectory(external/gtest-1.8.1 googletest)
+endif()
 
 # Configure a header file to pass some of the CMake settings
 # to the source code
@@ -27,5 +32,7 @@ add_subdirectory(src/top/nested)
 add_subdirectory(src/apps)
 
 # Tests
-enable_testing()
-add_subdirectory(tests/top/nested/)
+if (BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests/top/nested)
+endif()
