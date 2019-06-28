@@ -15,6 +15,10 @@ option(BUILD_TESTS "Build tests" ON)
 # External projects
 if (BUILD_TESTS)
 	add_subdirectory(external/gtest-1.8.1 googletest)
+# installed as git submodule - if this is your first clone you need to
+# git submodule init
+# git submodule update
+# This is a cmake module and needs no further input from you
 endif()
 
 # Configure a header file to pass some of the CMake settings
