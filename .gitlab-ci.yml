@@ -4,6 +4,11 @@
 # see https://hub.docker.com/_/gcc/
 image: gcc
 
+variables:
+  # Needed if you want automatic submodule checkout
+  # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
+  GIT_SUBMODULE_STRATEGY: normal
+
 stages:
   - build
   - lint
