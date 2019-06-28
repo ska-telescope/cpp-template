@@ -9,19 +9,8 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-include (gtest-install)
-
-ExternalProject_Get_Property(gtest-install install_dir)
-
-set(GTEST_INCLUDE ${install_dir}/include)
-set(GTEST_GTEST_LIBRARY ${install_dir}/lib/libgtest.a)
-set(GTEST_GTEST_MAIN_LIBRARY ${install_dir}/lib/libgtest_main.a)
-set(GTEST_MOCK_LIBRARY ${install_dir}/lib/libmock.a)
-set(GTEST_MOCK_MAIN_LIBRARY ${install_dir}/lib/libmock_main.a)
-
-include_directories(${GTEST_INCLUDE})
-
+# External projects
+add_subdirectory(external/gtest-1.8.1 googletest)
 
 # Configure a header file to pass some of the CMake settings
 # to the source code
