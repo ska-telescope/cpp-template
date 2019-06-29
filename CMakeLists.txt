@@ -12,6 +12,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Building options
 option(BUILD_TESTS "Build tests" ON)
 
+# cpplint lint checking
+# from https://github.com/filug/cmake-modules/blob/master/cpplint.cmake
+# and https://github.com/acado/acado/blob/master/cmake/CppLint.cmake
+# with the addition of *.cc files
+option(LINT_TESTS "Lint tests" ON)
+if (LINT_TESTS)
+    include(cmake/cpplint.cmake)
+    cpplint_add_subdirectory(src/top/nested)
+    cpplint_add_subdirectory(src/apps)
+endif()
+
 # External projects
 if (BUILD_TESTS)
 	add_subdirectory(external/gtest-1.8.1 googletest)
