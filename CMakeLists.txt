@@ -15,6 +15,7 @@ option(BUILD_TESTS "Build tests" ON)
 # External projects
 if (BUILD_TESTS)
 	add_subdirectory(external/gtest-1.8.1 googletest)
+	enable_testing()
 # installed as git submodule - if this is your first clone you need to
 # git submodule init
 # git submodule update
@@ -34,9 +35,3 @@ add_subdirectory(src/top/nested)
 
 # Executables
 add_subdirectory(src/apps)
-
-# Tests
-if (BUILD_TESTS)
-	enable_testing()
-	add_subdirectory(tests/top/nested)
-endif()
