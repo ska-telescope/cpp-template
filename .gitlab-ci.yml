@@ -92,7 +92,7 @@ pages:
   script:
     - mkdir .public
     - cd .public
-    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' --html --html-details -o index.html
+    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
     - cd ..
     - mv .public public
   artifacts:
