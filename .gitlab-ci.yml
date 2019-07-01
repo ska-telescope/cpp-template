@@ -85,7 +85,7 @@ test:
     paths:
       - build/
 
-publish:
+pages:
   stage: publish
   dependencies:
     - test
