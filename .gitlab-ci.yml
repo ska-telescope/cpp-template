@@ -21,7 +21,7 @@ stages:
   - build
   - lint
   - test
-  - publish
+  - deploy
 
 build_debug:
   stage: build
@@ -86,7 +86,7 @@ test:
       - build/
 
 pages:
-  stage: publish
+  stage: deploy
   dependencies:
     - test
   script:
