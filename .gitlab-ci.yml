@@ -10,7 +10,7 @@
 #  * gcovr
 #  * iwyu
 #  * clang-tidy 4.0
-image: steve-ord/cpp_template
+image: rtobar/cpp_build_system
 
 variables:
   # Needed if you want automatic submodule checkout
