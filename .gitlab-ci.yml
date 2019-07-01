@@ -80,10 +80,25 @@ test:
     - build_debug
   script:
     - cd build
-    - make test
+    - ctest
   artifacts:
     paths:
       - build/
+
+# A job that runs the tests under valgrid
+# It might take a while, so not always run by default
+test_memcheck:
+  stage: test
+  dependencies:
+    - build_debug
+  before_script:
+    - apt update && apt install -y valgrind
+  script:
+    - cd build
+    - ctest -T memcheck
+  only:
+    - tags
+    - schedules
 
 pages:
   stage: deploy
