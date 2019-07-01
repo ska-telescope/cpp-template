@@ -13,6 +13,7 @@ stages:
   - build
   - lint
   - test
+  - publish
 
 build_debug:
   stage: build
@@ -23,22 +24,14 @@ build_debug:
   script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
     - make
   artifacts:
     paths:
-      - build/src/src/top/nested/libHelloWorld.a
-      - build/src/apps/HelloWorld
-      - build/tests/top/nested/twave  
-      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-      # cache:
-      #   paths:
-      #     - "*.o"
+      - build
 
 build_release:
   stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
   before_script:
     - apt update && apt -y install cmake
   script:
@@ -50,31 +43,58 @@ build_release:
     paths:
       - build/src/src/top/nested/libHelloWorld.a
       - build/src/apps/HelloWorld
-lint_clang_tidy:
- stage: lint
+
+build_export_compile_commands:
+ stage: build
  script:
-    - apt update && apt -y install clang++-4.0 clang-tidy-4.0 cmake
+    - apt update && apt -y install clang++-4.0 cmake
     - rm -rf build && mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++-4.0
+ artifacts:
+    paths:
+      - build
+
+lint_clang_tidy:
+ stage: lint
+ dependencies:
+    - build_export_compile_commands
+ script:
+    - apt update && apt -y install clang-tidy-4.0
+    - cd build
     - run-clang-tidy-4.0.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
 
 lint_iwyu:
  stage: lint
+ dependencies:
+    - build_export_compile_commands
  script:
-    - apt update && apt -y install iwyu cmake clang++-4.0
-    - rm -rf build && mkdir build
+    - apt update && apt -y install iwyu
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++-4.0
     - iwyu_tool -p .
 
-# run tests using the binary built before
-#
 test:
   stage: test
-
-  before_script:
+  dependencies:
+    - build_debug
   script:
-    - cd build/tests/top/nested
-    - ./twave
+    - cd build
+    - make test
+  artifacts:
+    paths:
+      - build/
 
+publish:
+  stage: publish
+  dependencies:
+    - test
+  script:
+    - apt update && apt install gcovr
+    - mkdir .public
+    - cd .public
+    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' --html --html-details -o index.html
+    - cd ..
+    - mv .public public
+  artifacts:
+    paths:
+      - public
