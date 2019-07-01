@@ -2,7 +2,15 @@
 # use the official gcc image, based on debian
 # can use verions as well, like gcc:5.2
 # see https://hub.docker.com/_/gcc/
-image: gcc
+#
+# This base image is based on debian:stretch-slim and contains:
+#  * gcc 6.2
+#  * clang 4.0
+#  * cmake 3.7.2
+#  * gcovr
+#  * iwyu
+#  * clang-tidy 4.0
+image: steve-ord/cpp_template
 
 variables:
   # Needed if you want automatic submodule checkout
@@ -19,8 +27,6 @@ build_debug:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
-  before_script:
-    - apt update && apt -y install cmake
   script:
     - mkdir build
     - cd build
@@ -32,8 +38,6 @@ build_debug:
 
 build_release:
   stage: build
-  before_script:
-    - apt update && apt -y install cmake
   script:
     - mkdir build
     - cd build
@@ -47,7 +51,6 @@ build_release:
 build_export_compile_commands:
  stage: build
  script:
-    - apt update && apt -y install clang++-4.0 cmake
     - rm -rf build && mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++-4.0
@@ -60,7 +63,6 @@ lint_clang_tidy:
  dependencies:
     - build_export_compile_commands
  script:
-    - apt update && apt -y install clang-tidy-4.0
     - cd build
     - run-clang-tidy-4.0.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
 
@@ -69,7 +71,6 @@ lint_iwyu:
  dependencies:
     - build_export_compile_commands
  script:
-    - apt update && apt -y install iwyu
     - cd build
     - iwyu_tool -p .
 
@@ -89,7 +90,6 @@ publish:
   dependencies:
     - test
   script:
-    - apt update && apt install gcovr
     - mkdir .public
     - cd .public
     - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' --html --html-details -o index.html
