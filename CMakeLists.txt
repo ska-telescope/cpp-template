@@ -28,7 +28,7 @@ configure_file(HelloWorldConfig.h.in HelloWorldConfig.h)
 
 # Include directories needed by all sources
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(include)
+include_directories(src)
 
 # Libraries
 add_subdirectory(src/top/nested)
