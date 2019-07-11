@@ -19,9 +19,9 @@ variables:
 
 stages:
   - build
-  - lint
+  - linting
   - test
-  - deploy
+  - pages
 
 build_debug:
   stage: build
@@ -59,7 +59,7 @@ build_export_compile_commands:
       - build
 
 lint_clang_tidy:
- stage: lint
+ stage: linting
  dependencies:
     - build_export_compile_commands
  script:
@@ -67,7 +67,7 @@ lint_clang_tidy:
     - run-clang-tidy-4.0.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
 
 lint_iwyu:
- stage: lint
+ stage: linting
  dependencies:
     - build_export_compile_commands
  script:
@@ -101,7 +101,7 @@ test_memcheck:
     - schedules
 
 pages:
-  stage: deploy
+  stage: pages
   dependencies:
     - test
   script:
