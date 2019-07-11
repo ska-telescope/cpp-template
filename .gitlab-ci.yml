@@ -80,10 +80,15 @@ test:
     - build_debug
   script:
     - cd build
-    - ctest
+    - ctest -T test
+  after_script:
+    - cd build
+    - ctest2junit > ctest.xml
   artifacts:
     paths:
       - build/
+    reports:
+      junit: ctest.xml
 
 # A job that runs the tests under valgrid
 # It might take a while, so not always run by default
