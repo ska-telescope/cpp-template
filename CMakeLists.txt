@@ -6,7 +6,7 @@ message(STATUS "Building HelloWorld version ${HelloWorld_VERSION}")
 # Project configuration, specifying version, languages,
 # and the C++ standard to use for the whole project
 project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Building options
