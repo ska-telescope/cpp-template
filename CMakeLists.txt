@@ -22,16 +22,4 @@ if (BUILD_TESTS)
 # This is a cmake module and needs no further input from you
 endif()
 
-# Configure a header file to pass some of the CMake settings
-# to the source code
-configure_file(HelloWorldConfig.h.in HelloWorldConfig.h)
-
-# Include directories needed by all sources
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(src)
-
-# Libraries
-add_subdirectory(src/top/nested)
-
-# Executables
-add_subdirectory(src/apps)
+add_subdirectory(src)
