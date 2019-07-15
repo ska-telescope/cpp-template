@@ -1,14 +1,29 @@
-add_library(HelloClasses
-	hello.cc
-	wave.cc
+set(public_headers
+  hello.h
+  wave.h
+)
+set(private_headers
+  wave_impl.h
+)
+set(sources
+  hello.cc
+  wave.cc
+)
+
+add_library(
+  HelloClasses
+    ${sources}
+    ${private_headers}
+    ${public_headers}
 )
 
 if (BUILD_TESTS)
-	add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()
 
-install( FILES
-  hello.h
-  wave.h
-  DESTINATION include/top/nested
-  )
+install(
+  FILES
+    ${public_headers}
+  DESTINATION
+    include/top/nested
+)
