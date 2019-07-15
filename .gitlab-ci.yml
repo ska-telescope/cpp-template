@@ -80,7 +80,7 @@ test:
     - build_debug
   script:
     - cd build
-    - ctest -T test
+    - ctest -T test --no-compress-output
   after_script:
     - cd build
     - ctest2junit > ctest.xml
