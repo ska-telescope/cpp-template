@@ -3,14 +3,15 @@
 # can use verions as well, like gcc:5.2
 # see https://hub.docker.com/_/gcc/
 #
-# This base image is based on debian:stretch-slim and contains:
-#  * gcc 6.2
-#  * clang 4.0
-#  * cmake 3.7.2
-#  * gcovr
-#  * iwyu
-#  * clang-tidy 4.0
-image: rtobar/cpp_build_system
+# This base image is based on debian:buster-slim and contains:
+#  * gcc 8.3.0
+#  * clang 7.0.1
+#  * cmake 3.13.4
+#  * and more
+#
+# For details see https://github.com/ska-telescope/cpp_build_base
+#
+image: nexus.engageska-portugal.pt/ska-docker/cpp_build_base
 
 variables:
   # Needed if you want automatic submodule checkout
