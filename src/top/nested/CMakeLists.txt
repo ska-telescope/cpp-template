@@ -17,7 +17,7 @@ add_library(
     ${public_headers}
 )
 
-if (BUILD_TESTS)
+if (BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 

@@ -9,13 +9,11 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Building options
-option(BUILD_TESTS "Build tests" ON)
+include(CTest)
 
 # External projects
-if (BUILD_TESTS)
+if (BUILD_TESTING)
 	add_subdirectory(external/gtest-1.8.1 googletest)
-	include(CTest)
 # installed as git submodule - if this is your first clone you need to
 # git submodule init
 # git submodule update

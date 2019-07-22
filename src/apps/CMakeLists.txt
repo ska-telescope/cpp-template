@@ -4,6 +4,4 @@ target_link_libraries (HelloWorld HelloClasses)
 
 install (TARGETS HelloWorld DESTINATION bin)
 
-if (BUILD_TESTS)
-	add_test(NAME HelloWorldExec COMMAND HelloWorld)
-endif()
+add_test(NAME HelloWorldExec COMMAND HelloWorld)
