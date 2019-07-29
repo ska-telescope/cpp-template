@@ -4,3 +4,9 @@ add_test(
     NAME twave
     COMMAND twave
 )
+add_executable(tcall tcall.cc)
+target_link_libraries(tcall HelloClasses gtest)
+add_test(
+    NAME tcall
+    COMMAND tcall
+)

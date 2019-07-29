@@ -1,13 +1,16 @@
 set(public_headers
   hello.h
   wave.h
+  call.h
 )
 set(private_headers
   wave_impl.h
+  call_impl.h
 )
 set(sources
   hello.cc
   wave.cc
+  call.cc
 )
 
 add_library(
