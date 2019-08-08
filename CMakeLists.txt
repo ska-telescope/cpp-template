@@ -22,6 +22,6 @@ if (BUILD_TESTING)
 # This is a cmake module and needs no further input from you
 endif()
 
-install_dependencies()
+find_dependencies()
 
 add_subdirectory(src)
