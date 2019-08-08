@@ -18,11 +18,6 @@ variables:
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: normal
 
-default:
-  before_script:
-    - apt update
-    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt install -y
-    
 stages:
   - build
   - linting
