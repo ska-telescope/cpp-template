@@ -1,6 +1,6 @@
 //! Boilerplate tests from the GoogleTests package
 
-#include "top/nested/wave.h" // The class I am testing
+#include "ska/nested/wave.h" // The class I am testing
 #include "gtest/gtest.h" // the googletest framework
 
 namespace {
@@ -37,7 +37,7 @@ class WaveTest : public ::testing::Test {
 
 // Tests that the Wave::greeting() method does what we expect.
 TEST_F(WaveTest, MethodWave) {
-  top::nested::wave f;
+  ska::nested::wave f;
   EXPECT_EQ(f.greeting(),"I am waving hello");
 }
 

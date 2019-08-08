@@ -1,12 +1,12 @@
-#ifndef TOP_NESTED_WAVE_H
-#define TOP_NESTED_WAVE_H
+#ifndef SKA_NESTED_WAVE_H
+#define SKA_NESTED_WAVE_H
 
 #include <memory>
 #include <string>
 
-#include "top/nested/hello.h"
+#include "ska/nested/hello.h"
 
-namespace top {
+namespace ska {
 namespace nested {
 
 /// A wave class implemented with a Pimpl idiom
@@ -22,6 +22,6 @@ private:
 };
 
 } // namespace nested
-} // namespace top
+} // namespace ska
 
-#endif // TOP_NESTED_WAVE_H
+#endif // SKA_NESTED_WAVE_H

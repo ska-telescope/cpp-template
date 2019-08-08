@@ -3,10 +3,10 @@
 #include <string>
 
 /// Local Includes
-#include "top/nested/wave.h"
-#include "top/nested/wave_impl.h"
+#include "ska/nested/wave.h"
+#include "ska/nested/wave_impl.h"
 
-namespace top {
+namespace ska {
 namespace nested {
 
 wave::wave_impl::wave_impl() {
@@ -35,4 +35,4 @@ std::string wave::greeting()
 
 
 } // namespace nested
-} // namespace top
+} // namespace ska
