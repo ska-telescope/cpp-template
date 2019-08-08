@@ -18,6 +18,10 @@ variables:
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: normal
 
+default:
+  before_script:
+    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt-get install -y
+    
 stages:
   - build
   - linting
@@ -28,8 +32,6 @@ build_debug:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
-  before_script:
-    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt-get install -y
   script:
     - mkdir build
     - cd build
