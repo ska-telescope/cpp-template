@@ -28,6 +28,8 @@ build_debug:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
+  before script:
+    - cat dependencies.txt | grep ^install|^both | awk '{print $2}' | xargs apt-get
   script:
     - mkdir build
     - cd build
