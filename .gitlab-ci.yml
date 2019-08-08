@@ -20,7 +20,8 @@ variables:
 
 default:
   before_script:
-    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt-get install -y
+    - apt update
+    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt install -y
     
 stages:
   - build
