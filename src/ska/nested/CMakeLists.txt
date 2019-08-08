@@ -25,5 +25,5 @@ install(
   FILES
     ${public_headers}
   DESTINATION
-    include/top/nested
+    include/ska/nested
 )

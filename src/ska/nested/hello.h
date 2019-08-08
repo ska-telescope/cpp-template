@@ -1,8 +1,8 @@
-#ifndef TOP_NESTED_HELLO_H
-#define TOP_NESTED_HELLO_H
+#ifndef SKA_NESTED_HELLO_H
+#define SKA_NESTED_HELLO_H
 #include <string>
 
-namespace top {
+namespace ska {
 namespace nested {
 
 class hello {
@@ -15,6 +15,6 @@ class hello {
 
 };
 } // namespace nested
-} // namespace top
+} // namespace ska
 #endif
 
