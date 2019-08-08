@@ -9,6 +9,8 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/external/cmake-modules)
+include(dependencies)
 include(CTest)
 
 # External projects
@@ -19,5 +21,7 @@ if (BUILD_TESTING)
 # git submodule update
 # This is a cmake module and needs no further input from you
 endif()
+
+install_dependencies()
 
 add_subdirectory(src)
