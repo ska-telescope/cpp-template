@@ -29,7 +29,7 @@ build_debug:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-    - cat dependencies.txt | grep ^install|^both | awk '{print $2}' | xargs apt-get
+    - cat dependencies.txt | grep '^install|^both' | awk '{print $2}' | xargs apt-get install -y
   script:
     - mkdir build
     - cd build
