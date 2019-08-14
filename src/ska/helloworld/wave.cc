@@ -3,11 +3,11 @@
 #include <string>
 
 /// Local Includes
-#include "ska/nested/wave.h"
-#include "ska/nested/wave_impl.h"
+#include "ska/helloworld/wave.h"
+#include "ska/helloworld/wave_impl.h"
 
 namespace ska {
-namespace nested {
+namespace helloworld {
 
 wave::wave_impl::wave_impl() {
   std::cout << "The derived(virtual) constructor for a wave" << std::endl;
@@ -34,5 +34,5 @@ std::string wave::greeting()
 }
 
 
-} // namespace nested
+} // namespace helloworld
 } // namespace ska

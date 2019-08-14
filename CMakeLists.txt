@@ -16,7 +16,7 @@ include(CTest)
 
 # External projects
 if (BUILD_TESTING)
-	add_subdirectory(external/gtest-1.8.1 googletest)
+  add_subdirectory(external/gtest-1.8.1 googletest EXCLUDE_FROM_ALL)
 # installed as git submodule - if this is your first clone you need to
 # git submodule init
 # git submodule update
@@ -25,4 +25,37 @@ endif()
 
 find_dependencies()
 
-add_subdirectory(src)
+add_subdirectory(src/ska/helloworld)
+add_subdirectory(src/apps)
+
+# Install cmake config + version + target files
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/HelloWorldConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake"
+  INSTALL_DESTINATION
+    lib/cmake/helloworld
+)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake"
+  COMPATIBILITY
+    AnyNewerVersion
+)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake
+  DESTINATION
+    lib/cmake/helloworld
+  COMPONENT
+    dev
+)
+install(EXPORT helloworld-targets
+  FILE
+    HelloWorldTargets.cmake
+  DESTINATION
+    lib/cmake/helloworld
+  COMPONENT
+    dev
+  NAMESPACE
+    helloworld::
+)
