@@ -1,12 +1,12 @@
 #include <iostream>
 
-#include "HelloWorldConfig.h"
-#include "ska/nested/hello.h"
-#include "ska/nested/wave.h"
+#include "ska/helloworld/config.h"
+#include "ska/helloworld/hello.h"
+#include "ska/helloworld/wave.h"
 
 int main() {
 
-	ska::nested::wave theHello;
+	ska::helloworld::wave theHello;
 
 	std::cout << "Hello world version: " << HelloWorld_VERSION_MAJOR << ":"
 	          << HelloWorld_VERSION_MINOR << ":"

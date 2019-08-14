@@ -1,13 +1,13 @@
-#ifndef SKA_NESTED_WAVE_H
-#define SKA_NESTED_WAVE_H
+#ifndef SKA_HELLOWORLD_WAVE_H
+#define SKA_HELLOWORLD_WAVE_H
 
 #include <memory>
 #include <string>
 
-#include "ska/nested/hello.h"
+#include "ska/helloworld/hello.h"
 
 namespace ska {
-namespace nested {
+namespace helloworld {
 
 /// A wave class implemented with a Pimpl idiom
 class wave : public hello {
@@ -21,7 +21,7 @@ private:
   std::unique_ptr<wave_impl> impl;
 };
 
-} // namespace nested
+} // namespace helloworld
 } // namespace ska
 
-#endif // SKA_NESTED_WAVE_H
+#endif // SKA_HELLOWORLD_WAVE_H

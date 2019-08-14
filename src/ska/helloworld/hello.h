@@ -1,9 +1,9 @@
-#ifndef SKA_NESTED_HELLO_H
-#define SKA_NESTED_HELLO_H
+#ifndef SKA_HELLOWORLD_HELLO_H
+#define SKA_HELLOWORLD_HELLO_H
 #include <string>
 
 namespace ska {
-namespace nested {
+namespace helloworld {
 
 class hello {
 
@@ -14,7 +14,6 @@ class hello {
     virtual std::string greeting() = 0;
 
 };
-} // namespace nested
+} // namespace helloworld
 } // namespace ska
-#endif
-
+#endif // SKA_HELLOWORLD_HELLO_H

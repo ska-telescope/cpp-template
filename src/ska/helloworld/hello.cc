@@ -1,14 +1,14 @@
 /// System Includes
 #include <iostream>
 /// Local Includes
-#include "ska/nested/hello.h"
+#include "ska/helloworld/hello.h"
 namespace ska {
-namespace nested {
+namespace helloworld {
 hello::hello() {
   std::cout << "The default constructor for a hello" << std::endl;
 }
 hello::~hello() {
   std::cout << "The default destructor for a hello" << std::endl;
 }
-} // namespace nested
+} // namespace helloworld
 } // namespace ska
