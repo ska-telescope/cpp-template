@@ -9,7 +9,7 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/external/cmake-modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external/cmake-modules)
 include(dependencies)
 include(lint)
 include(CTest)
