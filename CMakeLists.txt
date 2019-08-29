@@ -34,7 +34,7 @@ configure_package_config_file(
   cmake/HelloWorldConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake"
   INSTALL_DESTINATION
-    lib/cmake/helloworld
+    share/helloworld/cmake
 )
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake"
@@ -45,7 +45,7 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake
   DESTINATION
-    lib/cmake/helloworld
+    share/helloworld/cmake
   COMPONENT
     dev
 )
@@ -53,7 +53,7 @@ install(EXPORT helloworld-targets
   FILE
     HelloWorldTargets.cmake
   DESTINATION
-    lib/cmake/helloworld
+    share/helloworld/cmake
   COMPONENT
     dev
   NAMESPACE
