@@ -26,6 +26,7 @@ target_include_directories(HelloClasses PUBLIC
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
   $<INSTALL_INTERFACE:include>
 )
+add_library(helloworld::HelloClasses ALIAS HelloClasses)
 
 if (BUILD_TESTING)
   add_subdirectory(tests)
