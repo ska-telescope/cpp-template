@@ -117,6 +117,7 @@ test_installation:
     - cmake . -DCMAKE_INSTALL_PREFIX=/opt
     - make install
     - cd ../examples/helloworld-user
+    - if [ -d build ]; then rm -rf build; fi 
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_PREFIX_PATH=/opt
@@ -129,6 +130,7 @@ test_as_subproject:
     - cp -r examples/helloworld-user ..
     - cd ../helloworld-user
     - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
+    - if [ -d build ]; then rm -rf build; fi 
     - mkdir build
     - cd build
     - cmake ..
