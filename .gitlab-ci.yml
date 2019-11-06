@@ -157,6 +157,8 @@ pages:
   stage: pages
   dependencies:
     - test
+  before_script:
+    - apt update && apt install -y curl
   script:
     - mkdir .public
     - cd .public
