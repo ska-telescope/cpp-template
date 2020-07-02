@@ -66,8 +66,7 @@ build_export_compile_commands:
 lint_clang_tidy:
   extends: .common
   stage: linting
-  dependencies:
-    - build_export_compile_commands
+  needs: ["build_export_compile_commands"]
   script:
     - cd build
     - run-clang-tidy -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
@@ -75,8 +74,7 @@ lint_clang_tidy:
 lint_iwyu:
   extends: .common
   stage: linting
-  dependencies:
-    - build_export_compile_commands
+  needs: ["build_export_compile_commands"]
   script:
     - cd build
     - iwyu_tool -p .
@@ -84,8 +82,7 @@ lint_iwyu:
 lint_cppcheck:
   extends: .common
   stage: linting
-  dependencies:
-    - build_export_compile_commands
+  needs: ["build_export_compile_commands"]
   script:
     - cd build
     - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../external -i $PWD/../src/ska/helloworld/test
@@ -93,8 +90,7 @@ lint_cppcheck:
 test:
   extends: .common
   stage: test
-  dependencies:
-    - build_debug
+  needs: ["build_debug"]
   script:
     - cd build
     - ctest -T test --no-compress-output
@@ -140,8 +136,7 @@ test_as_subproject:
 test_memcheck:
   extends: .common
   stage: test
-  dependencies:
-    - build_debug
+  needs: ["build_debug"]
   before_script:
     - apt update && apt install -y valgrind
   script:
@@ -154,8 +149,7 @@ test_memcheck:
 pages:
   extends: .common
   stage: pages
-  dependencies:
-    - test
+  needs: ["test"]
   before_script:
     - apt update && apt install -y curl
   script:
