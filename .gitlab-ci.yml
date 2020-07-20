@@ -145,10 +145,11 @@ test_as_subproject:
 # A job that runs the tests under valgrid
 # It might take a while, so not always run by default
 test_memcheck:
-  extends: .common.artifact-retriever
+  extends: .common
   stage: test
   needs: ["build_debug"]
   before_script:
+    - *src_dir_ref_replacement
     - apt update && apt install -y valgrind
   script:
     - cd build
