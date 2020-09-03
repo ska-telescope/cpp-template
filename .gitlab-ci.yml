@@ -25,7 +25,15 @@ variables:
 .src_dir_ref_replacement: &src_dir_ref_replacement
   - old_sdir=`cat build/original_source_directory`
   - this_sdir=`pwd`
-  - find build -type f -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
+  - find build
+    -type f -a
+    \! \(
+      -perm /111 -o
+      \(
+        -name '*.o' -o -name '*.a' -o -name '*.so'
+      \)
+    \)
+    -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
 .common: {tags: [engageska, docker]}
 
