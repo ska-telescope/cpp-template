@@ -181,7 +181,7 @@ pages:
     - cp ../build/ctest.xml build/reports/unit-tests.xml
     # Create and upload GitLab badges
     - python ../.produce-ci-metrics.py build/reports > ci-metrics.json
-    - curl -s https://gitlab.com/ska-telescope/ci-metrics-utilities/raw/master/scripts/ci-badges-func.sh | sh
+    - curl -s https://gitlab.com/ska-telescope/ska-cicd-ci-metrics-utilities/raw/master/ska_ci_metrics_utilities/ci-badges-func.sh | sh
     - cd ..
     - mv .public public
   artifacts:
