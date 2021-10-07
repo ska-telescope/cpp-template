@@ -143,7 +143,7 @@ test_as_subproject:
   script:
     - cp -r src/examples/helloworld-user ..
     - cd ../helloworld-user
-    - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
+    - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/ska-cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
     - if [ -d build ]; then rm -rf build; fi
     - mkdir build
     - cd build
