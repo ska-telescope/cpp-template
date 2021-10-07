@@ -103,7 +103,7 @@ lint_cppcheck:
   needs: ["build_export_compile_commands"]
   script:
     - cd build
-    - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../external -i $PWD/../src/ska/helloworld/test
+    - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
 
 test:
   extends: .common.artifact-retriever
@@ -130,7 +130,7 @@ test_installation:
     - cd build
     - cmake . -DCMAKE_INSTALL_PREFIX=/opt
     - make install
-    - cd ../examples/helloworld-user
+    - cd ../src/examples/helloworld-user
     - if [ -d build ]; then rm -rf build; fi
     - mkdir build
     - cd build
@@ -141,7 +141,7 @@ test_as_subproject:
   extends: .common.artifact-retriever
   stage: test
   script:
-    - cp -r examples/helloworld-user ..
+    - cp -r src/examples/helloworld-user ..
     - cd ../helloworld-user
     - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
     - if [ -d build ]; then rm -rf build; fi
@@ -176,8 +176,8 @@ pages:
   script:
     - mkdir -p .public/build/reports
     - cd .public
-    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
-    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
+    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
+    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
     - cp ../build/ctest.xml build/reports/unit-tests.xml
     # Create and upload GitLab badges
     - python ../.produce-ci-metrics.py build/reports > ci-metrics.json
