@@ -11,7 +11,7 @@
 #
 # For details see https://github.com/ska-telescope/cpp_build_base
 #
-image: nexus.engageska-portugal.pt/ska-docker/cpp_build_base
+image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
 variables:
   # Needed if you want automatic submodule checkout
