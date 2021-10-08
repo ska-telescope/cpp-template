@@ -16,7 +16,7 @@ include(CTest)
 
 # External projects
 if (BUILD_TESTING)
-  add_subdirectory(resources/gtest-1.8.1 googletest EXCLUDE_FROM_ALL)
+  add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
 # installed as git submodule - if this is your first clone you need to
 # git submodule init
 # git submodule update
