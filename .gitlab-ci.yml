@@ -71,6 +71,7 @@ build_release:
   extends: .common.artifact-builder
   stage: build
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
@@ -79,6 +80,7 @@ build_export_compile_commands:
  extends: .common.artifact-builder
  stage: build
  script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++
 
@@ -87,6 +89,7 @@ lint_clang_tidy:
   stage: linting
   needs: ["build_export_compile_commands"]
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - run-clang-tidy -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
 
@@ -95,6 +98,7 @@ lint_iwyu:
   stage: linting
   needs: ["build_export_compile_commands"]
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - iwyu_tool -p .
 
@@ -103,6 +107,7 @@ lint_cppcheck:
   stage: linting
   needs: ["build_export_compile_commands"]
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
 
@@ -111,6 +116,7 @@ test:
   stage: test
   needs: ["build_debug"]
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - ctest -T test --no-compress-output
   after_script:
@@ -128,6 +134,7 @@ test_installation:
   stage: test
   needs: ["build_release"]
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - cmake . -DCMAKE_INSTALL_PREFIX=/opt
     - make install
@@ -142,6 +149,7 @@ test_as_subproject:
   extends: .common.artifact-retriever
   stage: test
   script:
+    - apt update -y && apt install -y build-essential
     - cp -r src/examples/helloworld-user ..
     - cd ../helloworld-user
     - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/ska-cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
@@ -161,6 +169,7 @@ test_memcheck:
     - *src_dir_ref_replacement
     - apt update && apt install -y valgrind make
   script:
+    - apt update -y && apt install -y build-essential
     - cd build
     - ctest -T memcheck
   only:
@@ -175,6 +184,7 @@ pages:
     - *src_dir_ref_replacement
     - apt update && apt install -y curl make
   script:
+    - apt update -y && apt install -y build-essential
     - mkdir -p .public/build/reports
     - cd .public
     - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
