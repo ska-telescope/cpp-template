@@ -41,7 +41,7 @@ variables:
   extends: .common
   before_script:
     - *src_dir_ref_storage
-    - apt install -y make
+    - apt update && apt install -y make
   artifacts:
     paths:
       - build
@@ -50,7 +50,7 @@ variables:
   extends: .common
   before_script:
     - *src_dir_ref_replacement
-    - apt install -y make
+    - apt update && apt install -y make
 
 stages:
   - build
