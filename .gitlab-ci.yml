@@ -11,12 +11,12 @@
 #
 # For details see https://github.com/ska-telescope/cpp_build_base
 #
-image: nexus.engageska-portugal.pt/ska-docker/cpp_build_base
+image: $CAR_OCI_REGISTRY_HOST/ska-cicd-cpp-build-base:0.2.8
 
 variables:
   # Needed if you want automatic submodule checkout
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
-  GIT_SUBMODULE_STRATEGY: normal
+  GIT_SUBMODULE_STRATEGY: recursive
 
 .src_dir_ref_storage: &src_dir_ref_storage
   - mkdir build || true
@@ -103,7 +103,7 @@ lint_cppcheck:
   needs: ["build_export_compile_commands"]
   script:
     - cd build
-    - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../external -i $PWD/../src/ska/helloworld/test
+    - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
 
 test:
   extends: .common.artifact-retriever
@@ -130,7 +130,7 @@ test_installation:
     - cd build
     - cmake . -DCMAKE_INSTALL_PREFIX=/opt
     - make install
-    - cd ../examples/helloworld-user
+    - cd ../src/examples/helloworld-user
     - if [ -d build ]; then rm -rf build; fi
     - mkdir build
     - cd build
@@ -141,9 +141,9 @@ test_as_subproject:
   extends: .common.artifact-retriever
   stage: test
   script:
-    - cp -r examples/helloworld-user ..
+    - cp -r src/examples/helloworld-user ..
     - cd ../helloworld-user
-    - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
+    - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/ska-cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
     - if [ -d build ]; then rm -rf build; fi
     - mkdir build
     - cd build
@@ -158,7 +158,7 @@ test_memcheck:
   needs: ["build_debug"]
   before_script:
     - *src_dir_ref_replacement
-    - apt update && apt install -y valgrind
+    - apt update && apt install -y valgrind make
   script:
     - cd build
     - ctest -T memcheck
@@ -172,12 +172,12 @@ pages:
   needs: ["test"]
   before_script:
     - *src_dir_ref_replacement
-    - apt update && apt install -y curl
+    - apt update && apt install -y curl make
   script:
     - mkdir -p .public/build/reports
     - cd .public
-    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
-    - gcovr -r ../ -e '.*/external/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
+    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
+    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
     - cp ../build/ctest.xml build/reports/unit-tests.xml
     # Create and upload GitLab badges
     - python ../.produce-ci-metrics.py build/reports > ci-metrics.json

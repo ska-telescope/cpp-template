@@ -9,14 +9,14 @@ project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external/cmake-modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/resources/cmake-modules)
 include(dependencies)
 include(lint)
 include(CTest)
 
 # External projects
 if (BUILD_TESTING)
-  add_subdirectory(external/gtest-1.8.1 googletest EXCLUDE_FROM_ALL)
+  add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
 # installed as git submodule - if this is your first clone you need to
 # git submodule init
 # git submodule update
