@@ -12,7 +12,6 @@
 # For details see https://github.com/ska-telescope/cpp_build_base
 #
 image: $SKA_CPP_DOCKER_BUILDER_IMAGE
-image: $CAR_OCI_REGISTRY_HOST/ska-cicd-cpp-build-base:0.2.8
 
 include:
   - project: 'ska-telescope/templates-repository'
