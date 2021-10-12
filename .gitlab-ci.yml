@@ -11,7 +11,7 @@
 #
 # For details see https://github.com/ska-telescope/cpp_build_base
 #
-image: $CAR_OCI_REGISTRY_HOST/ska-cicd-cpp-build-base:0.2.8
+image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
 include:
   - project: 'ska-telescope/templates-repository'
@@ -20,7 +20,7 @@ include:
 variables:
   # Needed if you want automatic submodule checkout
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
-  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_STRATEGY: normal
 
 .src_dir_ref_storage: &src_dir_ref_storage
   - mkdir build || true
