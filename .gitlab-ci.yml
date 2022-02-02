@@ -13,10 +13,6 @@
 #
 image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
-include:
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/post_step.yml'
-
 variables:
   # Needed if you want automatic submodule checkout
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
@@ -198,3 +194,13 @@ pages:
   artifacts:
     paths:
       - public
+
+# ============================================================================
+# CI metrics
+# ============================================================================
+# Create Gitlab CI badges from CI metrics
+# https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
+include:
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/post_step.yml'
+
