@@ -110,6 +110,11 @@ lint_cppcheck:
     - apt update -y && apt install -y build-essential
     - cd build
     - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 week
+    when: always
 
 test:
   extends: .common.artifact-retriever
