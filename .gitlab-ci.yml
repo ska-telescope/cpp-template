@@ -110,6 +110,8 @@ lint_cppcheck:
     - apt update -y && apt install -y build-essential
     - cd build
     - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
+    - mkdir -p reports
+    - touch reports/linting.xml
   artifacts:
     paths:
       - build
@@ -127,12 +129,13 @@ test:
   after_script:
     - *src_dir_ref_storage
     - cd build
-    - ctest2junit > ctest.xml
+    - mkdir -p reports
+    - ctest2junit > reports/unit-tests.xml
   artifacts:
     paths:
       - build/
     reports:
-      junit: build/ctest.xml
+      junit: build/reports/unit-tests.xml
 
 test_installation:
   extends: .common.artifact-retriever
@@ -192,13 +195,15 @@ pages:
     - cd .public
     - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
     - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
-    - cp ../build/ctest.xml build/reports/unit-tests.xml
+    - cp ../build/reports/unit-tests.xml build/reports/unit-tests.xml
+    - cp build/reports/code-coverage.xml ../build/reports/code-coverage.xml
     # Create and upload GitLab badges
     - cd ..
     - mv .public public
   artifacts:
     paths:
       - public
+      - build
 
 # ============================================================================
 # CI metrics
