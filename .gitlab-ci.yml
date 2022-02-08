@@ -101,8 +101,7 @@ lint_clang_tidy:
     - jq '[ . - map(select(.file | contains("/external/"))) | .[] ]' compile_commands.json | sponge compile_commands.json
     - pip3 install pyyaml
     - ls -al /usr/bin/run-clang*
-    - python3 -u /usr/bin/run-clang-tidy-7.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
--quiet 2>&1 | tee clang-tidy.log
+    - python3 -u /usr/bin/run-clang-tidy-7.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*' -quiet 2>&1 | tee clang-tidy.log
     - cd ..
     - cat build/clang-tidy.log | python3 .clang-tidy-to-junit.py $PWD/ clang-tidy > build/clang-tidy-junit.xml
   artifacts:
