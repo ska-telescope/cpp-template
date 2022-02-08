@@ -50,6 +50,14 @@ variables:
   before_script:
     - *src_dir_ref_replacement
 
+.common.lint:
+  extends: .common.artifact-retriever
+  before_script:
+    - apt update
+    - apt install -y gnupg2 software-properties-common jq moreutils
+    - apt install -y pybind11-dev python3-pybind11
+    - apt install -y python3-pip clang clang-tidy clang-tools iwyu cppcheck xsltproc
+
 stages:
   - build
   - linting
@@ -85,36 +93,45 @@ build_export_compile_commands:
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++
 
 lint_clang_tidy:
-  extends: .common.artifact-retriever
+  extends: .common.lint
   stage: linting
   needs: ["build_export_compile_commands"]
   script:
-    - apt update -y && apt install -y build-essential
     - cd build
-    - run-clang-tidy -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
-
-lint_iwyu:
-  extends: .common.artifact-retriever
-  stage: linting
-  needs: ["build_export_compile_commands"]
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - iwyu_tool -p .
-
-lint_cppcheck:
-  extends: .common.artifact-retriever
-  stage: linting
-  needs: ["build_export_compile_commands"]
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - cppcheck --error-exitcode=1 --project=compile_commands.json -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test
-    - mkdir -p reports
-    - touch reports/linting.xml
+    - jq '[ . - map(select(.file | contains("/external/"))) | .[] ]' compile_commands.json | sponge compile_commands.json
+    - pip3 install pyyaml
+    - ls -al /usr/bin/run-clang*
+    - python3 -u /usr/bin/run-clang-tidy-7.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*'
+-quiet 2>&1 | tee clang-tidy.log
+    - cd ..
+    - cat build/clang-tidy.log | python3 .clang-tidy-to-junit.py $PWD/ clang-tidy > build/clang-tidy-junit.xml
   artifacts:
     paths:
-      - build
+      - ./build
+
+lint_iwyu:
+  extends: .common.lint
+  stage: linting
+  needs: ["build_export_compile_commands"]
+  script:
+    - iwyu_tool -j 2 -p ./build -- --transitive_includes_only 2>&1 | tee build/iwyu.log
+    - cat build/iwyu.log | python3 .clang-tidy-to-junit.py $PWD/ iwyu > build/iwyu-junit.xml
+  artifacts:
+    paths:
+      - ./build
+
+lint_cppcheck:
+  extends: .common.lint
+  stage: linting
+  needs: ["build_export_compile_commands"]
+  script:
+    - cd build
+    - pip3 install cppcheck-junit
+    - cppcheck --xml-version=2 --enable=all --project=compile_commands.json --platform=unix64  -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test --library=googletest 2>&1 | tee cppcheck.xml
+    - cppcheck_junit cppcheck.xml cppcheck-junit.xml
+  artifacts:
+    paths:
+      - ./build
     expire_in: 1 week
     when: always
 
@@ -184,9 +201,9 @@ test_memcheck:
     - schedules
 
 pages:
-  extends: .common
+  extends: .common.lint
   stage: pages
-  needs: ["test"]
+  needs: ["test","lint_clang_tidy","lint_iwyu","lint_cppcheck"]
   before_script:
     - *src_dir_ref_replacement
     - apt update && apt install -y curl make build-essential
@@ -200,6 +217,21 @@ pages:
     # Create and upload GitLab badges
     - cd ..
     - mv .public public
+    - pip3 install yq
+  after_script:
+    # Combine Linting XML
+    - cp build/cppcheck-junit.xml build/reports/cppcheck-junit.xml
+    - cp build/clang-tidy-junit.xml build/reports/clang-tidy-junit.xml
+    - cp build/iwyu-junit.xml build/reports/iwyu-junit.xml
+    - 'xq -s "{testsuites: { testsuite: [ .[0].testsuite, .[1].testsuite, .[2].testsuite ] } }"
+      build/reports/clang-tidy-junit.xml
+      build/reports/cppcheck-junit.xml
+      build/reports/iwyu-junit.xml
+      --xml-output | sponge build/reports/linting.xml'
+    # recalculate linting totals
+    - 'xq ".testsuites |= {\"@tests\": .testsuite | map(.\"@tests\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
+    - 'xq ".testsuites |= {\"@errors\": .testsuite | map(.\"@errors\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
+    - 'xq ".testsuites |= {\"@failures\": .testsuite | map(.\"@failures\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
   artifacts:
     paths:
       - public
