@@ -203,13 +203,12 @@ pages:
   extends: .common.lint
   stage: pages
   dependencies:
-    - test
     - lint_clang_tidy
     - lint_iwyu
     - lint_cppcheck
-  before_script:
-    - apt update && apt install -y curl make build-essential
+    - test
   script:
+    - apt update && apt install -y curl make build-essential
     - mkdir -p .public/build/reports
     - cd .public
     - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
