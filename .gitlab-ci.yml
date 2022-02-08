@@ -126,7 +126,7 @@ lint_cppcheck:
   script:
     - cd build
     - pip3 install cppcheck-junit
-    - cppcheck --xml-version=2 --enable=all --project=compile_commands.json --platform=unix64  -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test --library=googletest 2>&1 | tee cppcheck.xml
+    - cppcheck --xml-version=2 --enable=all --project=compile_commands.json --platform=unix64  -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test 2>&1 | tee cppcheck.xml
     - cppcheck_junit cppcheck.xml cppcheck-junit.xml
   artifacts:
     paths:
