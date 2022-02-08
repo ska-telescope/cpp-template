@@ -203,7 +203,11 @@ test_memcheck:
 pages:
   extends: .common.lint
   stage: pages
-  needs: ["test","lint_clang_tidy","lint_iwyu","lint_cppcheck"]
+  dependencies:
+    - test
+    - lint_clang_tidy
+    - lint_iwyu
+    - lint_cppcheck
   before_script:
     - *src_dir_ref_replacement
     - apt update && apt install -y curl make build-essential
