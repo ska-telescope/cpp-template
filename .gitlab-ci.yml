@@ -208,7 +208,6 @@ pages:
     - lint_iwyu
     - lint_cppcheck
   before_script:
-    - *src_dir_ref_replacement
     - apt update && apt install -y curl make build-essential
   script:
     - mkdir -p .public/build/reports
@@ -220,6 +219,7 @@ pages:
     # Create and upload GitLab badges
     - cd ..
     - mv .public public
+    - ls -al build
     - pip3 install yq
   after_script:
     # Combine Linting XML
