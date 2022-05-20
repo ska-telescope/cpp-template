@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 
-file(STRINGS version.txt HelloWorld_VERSION)
-message(STATUS "Building HelloWorld version ${HelloWorld_VERSION}")
+message(STATUS "Building ...")
 
 # Project configuration, specifying version, languages,
 # and the C++ standard to use for the whole project
-project(HelloWorld LANGUAGES CXX VERSION ${HelloWorld_VERSION})
+project(${PACKAGE_NAME} LANGUAGES CXX VERSION ${VERSION})
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -59,3 +58,6 @@ install(EXPORT helloworld-targets
   NAMESPACE
     helloworld::
 )
+
+# Deb Packing
+include(Packing)
