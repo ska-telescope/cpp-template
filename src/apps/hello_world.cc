@@ -8,9 +8,7 @@ int main() {
 
 	ska::helloworld::wave theHello;
 
-	std::cout << "Hello world version: " << HelloWorld_VERSION_MAJOR << ":"
-	          << HelloWorld_VERSION_MINOR << ":"
-	          << HelloWorld_VERSION_PATCH <<  std::endl;
+	std::cout << "Hello world!" << std::endl;
 
 	theHello.greeting();
 
