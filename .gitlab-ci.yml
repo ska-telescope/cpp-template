@@ -35,7 +35,7 @@ variables:
     \)
     -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
-.common: {tags: [engageska, docker]}
+.common: {tags: [k8srunner]}
 
 .common.artifact-builder:
   extends: .common
