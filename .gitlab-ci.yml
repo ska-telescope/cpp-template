@@ -75,6 +75,7 @@ build_debug:
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
     - make
+  allow_failure: true
 
 build_release:
   extends: .common.artifact-builder
@@ -84,14 +85,16 @@ build_release:
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
+  allow_failure: true
 
 build_export_compile_commands:
- extends: .common.artifact-builder
- stage: build
- script:
+  extends: .common.artifact-builder
+  stage: build
+  script:
     - apt update -y && apt install -y build-essential
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++
+  allow_failure: true
 
 lint_clang_tidy:
   extends: .common.lint
