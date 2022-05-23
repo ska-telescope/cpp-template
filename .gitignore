@@ -3,3 +3,4 @@ docs/build/*
 build
 MANIFEST.skao.int
 PrivateRules.mak
+*.gpg.key

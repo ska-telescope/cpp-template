@@ -3,8 +3,8 @@
 # build, 'make push' docker push procedure, etc. The other Make targets
 # ('make interactive', 'make test', etc.) are defined in this file.
 #
--include .make/deb.mk
 -include .make/base.mk
+-include .make/deb.mk
 
 # define private rules and additional makefiles
 -include ../PrivateRules.mak
