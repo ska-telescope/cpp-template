@@ -6,4 +6,4 @@
 	url = https://github.com/google/googletest.git
 [submodule ".make"]
 	path = .make
-	url = git@gitlab.com:ska-telescope/sdi/ska-cicd-makefile.git
+	url = https://gitlab.com/ska-telescope/sdi/ska-cicd-makefile.git
