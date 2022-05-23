@@ -4,7 +4,7 @@ message(STATUS "Building ...")
 
 # Project configuration, specifying version, languages,
 # and the C++ standard to use for the whole project
-project(${PACKAGE_NAME} LANGUAGES CXX VERSION ${VERSION})
+project(${PACKAGE_NAME} VERSION ${VERSION} DESCRIPTION ${DESCRIPTION} LANGUAGES CXX )
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
