@@ -63,6 +63,7 @@ stages:
   - linting
   - test
   - pages
+  - publish
 
 build_debug:
   extends: .common.artifact-builder
@@ -247,4 +248,10 @@ pages:
 include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/post_step.yml'
+  
+  # DEB push to CAR
+  - project: 'ska-telescope/templates-repository'
+    ref: st-1171-deb-support
+    file: 'gitlab-ci/includes/deb.gitlab-ci.yml'
+
 
