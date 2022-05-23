@@ -2,3 +2,4 @@ docs/build/*
 .vscode
 build
 MANIFEST.skao.int
+PrivateRules.mak
