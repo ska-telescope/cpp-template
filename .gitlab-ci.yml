@@ -262,6 +262,7 @@ include:
   
   # DEB push to CAR
   - project: 'ska-telescope/templates-repository'
+    ref: st-1171-deb-support
     file: 'gitlab-ci/includes/deb.gitlab-ci.yml'
 
 
