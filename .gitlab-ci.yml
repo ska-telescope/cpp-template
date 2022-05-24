@@ -262,4 +262,8 @@ include:
   
   # DEB push to CAR
   - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/deb.gitlab-ci.yml'
+    file: 'gitlab-ci/includes/deb.gitlab-ci.yml'  
+    
+  # Changelog generation
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/changelog.gitlab-ci.yml'
