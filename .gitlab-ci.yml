@@ -35,7 +35,7 @@ variables:
     \)
     -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
-.common: {tags: [engageska, docker]}
+.common: {tags: [k8srunner]}
 
 .common.artifact-builder:
   extends: .common
@@ -63,6 +63,7 @@ stages:
   - linting
   - test
   - pages
+  - publish
 
 build_debug:
   extends: .common.artifact-builder
@@ -74,6 +75,7 @@ build_debug:
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
     - make
+  allow_failure: true
 
 build_release:
   extends: .common.artifact-builder
@@ -83,14 +85,16 @@ build_release:
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
+  allow_failure: true
 
 build_export_compile_commands:
- extends: .common.artifact-builder
- stage: build
- script:
+  extends: .common.artifact-builder
+  stage: build
+  script:
     - apt update -y && apt install -y build-essential
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++
+  allow_failure: true
 
 lint_clang_tidy:
   extends: .common.lint
@@ -107,6 +111,7 @@ lint_clang_tidy:
   artifacts:
     paths:
       - ./build
+  allow_failure: true
 
 lint_iwyu:
   extends: .common.lint
@@ -118,6 +123,7 @@ lint_iwyu:
   artifacts:
     paths:
       - ./build
+  allow_failure: true
 
 lint_cppcheck:
   extends: .common.lint
@@ -133,6 +139,7 @@ lint_cppcheck:
       - ./build
     expire_in: 1 week
     when: always
+  allow_failure: true
 
 test:
   extends: .common.artifact-retriever
@@ -152,6 +159,7 @@ test:
       - build/
     reports:
       junit: build/reports/unit-tests.xml
+  allow_failure: true
 
 test_installation:
   extends: .common.artifact-retriever
@@ -168,6 +176,7 @@ test_installation:
     - cd build
     - cmake .. -DCMAKE_PREFIX_PATH=/opt
     - make all
+  allow_failure: true
 
 test_as_subproject:
   extends: .common.artifact-retriever
@@ -182,6 +191,7 @@ test_as_subproject:
     - cd build
     - cmake ..
     - make all
+  allow_failure: true
 
 # A job that runs the tests under valgrid
 # It might take a while, so not always run by default
@@ -198,6 +208,7 @@ test_memcheck:
   only:
     - tags
     - schedules
+  allow_failure: true
 
 pages:
   extends: .common.lint
@@ -238,6 +249,7 @@ pages:
     paths:
       - public
       - build
+  allow_failure: true
 
 # ============================================================================
 # CI metrics
@@ -247,4 +259,10 @@ pages:
 include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/post_step.yml'
+  
+  # DEB push to CAR
+  - project: 'ska-telescope/templates-repository'
+    ref: st-1171-deb-support
+    file: 'gitlab-ci/includes/deb.gitlab-ci.yml'
+
 
