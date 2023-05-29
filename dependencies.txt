@@ -1,3 +1,0 @@
-find cfitsio
-install cfitsio-dev
-

@@ -1,17 +1,6 @@
 # This file is a template, and might need editing before it works on your project.
-# use the official gcc image, based on debian
-# can use verions as well, like gcc:5.2
-# see https://hub.docker.com/_/gcc/
-#
-# This base image is based on debian:buster-slim and contains:
-#  * gcc 8.3.0
-#  * clang 7.0.1
-#  * cmake 3.13.4
-#  * and more
-#
-# For details see https://github.com/ska-telescope/cpp_build_base
-#
-image: $SKA_CPP_DOCKER_BUILDER_IMAGE
+
+image: debian:bookworm
 
 variables:
   # Needed if you want automatic submodule checkout
@@ -50,220 +39,77 @@ variables:
   before_script:
     - *src_dir_ref_replacement
 
-.common.lint:
-  extends: .common.artifact-retriever
-  before_script:
-    - apt update
-    - apt install -y gnupg2 software-properties-common jq moreutils
-    - apt install -y pybind11-dev python3-pybind11
-    - apt install -y python3-pip clang clang-tidy clang-tools iwyu cppcheck xsltproc
-
 stages:
   - build
-  - linting
-  - test
-  - pages
-  - publish
+  # - test
+  # - linting
+  # - pages
+  # - publish
+
+.build_packages: &build_packages
+  # LLVM7
+  - apt install -y lsb-release wget software-properties-common gnupg
+  - wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
+  - apt update && apt install -y clang-17 clang-tools-17 libc++-17-dev libc++abi-17-dev
+  - cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/include include --force
+  - cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/lib lib --force
+  # CMake
+  - apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
+  - bash ./cmake-3.26.4-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
+  # Extra
+  - apt install -y python3-pip ninja-build pipx
+  # Conan
+  - pipx run conan==1.60.0 config init
+  - apt install -y jq
+  - pipx run yq '.compiler.clang.version += [ "17" ]' /root/.conan/settings.yml -i -Y
 
 build_debug:
-  extends: .common.artifact-builder
-  stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
-    - make
-  allow_failure: true
-
-build_release:
-  extends: .common.artifact-builder
-  stage: build
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release
-    - make
-  allow_failure: true
-
-build_export_compile_commands:
-  extends: .common.artifact-builder
-  stage: build
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=clang++
-  allow_failure: true
-
-lint_clang_tidy:
-  extends: .common.lint
-  stage: linting
-  needs: ["build_export_compile_commands"]
-  script:
-    - cd build
-    - jq '[ . - map(select(.file | contains("/external/"))) | .[] ]' compile_commands.json | sponge compile_commands.json
-    - pip3 install pyyaml
-    - ls -al /usr/bin/run-clang*
-    - python3 -u /usr/bin/run-clang-tidy-7.py -checks='cppcoreguidelines-*,performance-*,readibility-*,modernize-*,misc-*,clang-analyzer-*,google-*' -quiet 2>&1 | tee clang-tidy.log
-    - cd ..
-    - cat build/clang-tidy.log | python3 .clang-tidy-to-junit.py $PWD/ clang-tidy > build/clang-tidy-junit.xml
-  artifacts:
-    paths:
-      - ./build
-  allow_failure: true
-
-lint_iwyu:
-  extends: .common.lint
-  stage: linting
-  needs: ["build_export_compile_commands"]
-  script:
-    - iwyu_tool -j 2 -p ./build -- --transitive_includes_only 2>&1 | tee build/iwyu.log
-    - cat build/iwyu.log | python3 .clang-tidy-to-junit.py $PWD/ iwyu > build/iwyu-junit.xml
-  artifacts:
-    paths:
-      - ./build
-  allow_failure: true
-
-lint_cppcheck:
-  extends: .common.lint
-  stage: linting
-  needs: ["build_export_compile_commands"]
-  script:
-    - cd build
-    - pip3 install cppcheck-junit
-    - cppcheck --xml-version=2 --enable=all --project=compile_commands.json --platform=unix64  -q --std=c++14 -i $PWD/../resources -i $PWD/../src/ska/helloworld/test 2>&1 | tee cppcheck.xml
-    - cppcheck_junit cppcheck.xml cppcheck-junit.xml
-  artifacts:
-    paths:
-      - ./build
-    expire_in: 1 week
-    when: always
-  allow_failure: true
-
-test:
-  extends: .common.artifact-retriever
-  stage: test
-  needs: ["build_debug"]
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - ctest -T test --no-compress-output
-  after_script:
-    - *src_dir_ref_storage
-    - cd build
-    - mkdir -p reports
-    - ctest2junit > reports/unit-tests.xml
-  artifacts:
-    paths:
-      - build/
-    reports:
-      junit: build/reports/unit-tests.xml
-  allow_failure: true
-
-test_installation:
-  extends: .common.artifact-retriever
-  stage: test
-  needs: ["build_release"]
-  script:
-    - apt update -y && apt install -y build-essential
-    - cd build
-    - cmake . -DCMAKE_INSTALL_PREFIX=/opt
-    - make install
-    - cd ../src/examples/helloworld-user
-    - if [ -d build ]; then rm -rf build; fi
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_PREFIX_PATH=/opt
-    - make all
-  allow_failure: true
-
-test_as_subproject:
-  extends: .common.artifact-retriever
-  stage: test
-  script:
-    - apt update -y && apt install -y build-essential
-    - cp -r src/examples/helloworld-user ..
-    - cd ../helloworld-user
-    - sed -i 's/find_package(HelloWorld)/add_subdirectory(..\/ska-cpp-template helloworld EXCLUDE_FROM_ALL)/' CMakeLists.txt
-    - if [ -d build ]; then rm -rf build; fi
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make all
-  allow_failure: true
-
-# A job that runs the tests under valgrid
-# It might take a while, so not always run by default
-test_memcheck:
   extends: .common
-  stage: test
-  needs: ["build_debug"]
+  stage: build
   before_script:
-    - *src_dir_ref_replacement
-    - apt update && apt install -y valgrind make build-essential
+    - apt update
+    - *build_packages
+    - *src_dir_ref_storage
   script:
-    - cd build
-    - ctest -T memcheck
-  only:
-    - tags
-    - schedules
+    - mkdir -p build/clang
+    - run conan==1.60.0 install . -g cmake_multi -if build/clang -s build_type=Debug --build=missing --profile=profile-clang-debian.txt
+    - cmake -B build/clang -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
+    - cmake --build build/clang --config Debug
   allow_failure: true
 
-pages:
-  extends: .common.lint
-  stage: pages
-  dependencies:
-    - lint_clang_tidy
-    - lint_iwyu
-    - lint_cppcheck
-    - test
-  script:
-    - apt update && apt install -y curl make build-essential
-    - mkdir -p .public/build/reports
-    - cd .public
-    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
-    - gcovr -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
-    - cp ../build/reports/unit-tests.xml build/reports/unit-tests.xml
-    - cp build/reports/code-coverage.xml ../build/reports/code-coverage.xml
-    # Create and upload GitLab badges
-    - cd ..
-    - mv .public public
-    - ls -al build
-    - pip3 install yq
-  after_script:
-    # Combine Linting XML
-    - cp build/cppcheck-junit.xml build/reports/cppcheck-junit.xml
-    - cp build/clang-tidy-junit.xml build/reports/clang-tidy-junit.xml
-    - cp build/iwyu-junit.xml build/reports/iwyu-junit.xml
-    - 'xq -s "{testsuites: { testsuite: [ .[0].testsuite, .[1].testsuite, .[2].testsuite ] } }"
-      build/reports/clang-tidy-junit.xml
-      build/reports/cppcheck-junit.xml
-      build/reports/iwyu-junit.xml
-      --xml-output | sponge build/reports/linting.xml'
-    # recalculate linting totals
-    - 'xq ".testsuites |= {\"@tests\": .testsuite | map(.\"@tests\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
-    - 'xq ".testsuites |= {\"@errors\": .testsuite | map(.\"@errors\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
-    - 'xq ".testsuites |= {\"@failures\": .testsuite | map(.\"@failures\" | tonumber) | add }+ ." build/reports/linting.xml --xml-output | sponge build/reports/linting.xml'
-  artifacts:
-    paths:
-      - public
-      - build
-  allow_failure: true
+# build_release:
+#   extends: .common.artifact-builder
+#   stage: build
+#   script:
+#     - apt update -y && apt install -y build-essential
+#     - cd build
+#     - cmake .. -DCMAKE_BUILD_TYPE=Release
+#     - make
+#   allow_failure: true
 
-# ============================================================================
-# CI metrics
-# ============================================================================
-# Create Gitlab CI badges from CI metrics
-# https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
-include:
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/post_step.yml'
-  
-  # DEB push to CAR
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/deb.gitlab-ci.yml'  
-    
-  # Changelog generation
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/changelog.gitlab-ci.yml'
+.docker_common:
+  image: docker:stable
+  tags:
+    - k8srunner
+  before_script:
+    # - docker login -u $DOCKER_REGISTRY_USERNAME -p $DOCKER_REGISTRY_PASSWORD $DOCKER_REGISTRY_HOST
+    - apk update
+    - apk upgrade
+    - apk add bash
+    - echo $CAR_OCI_REGISTRY_PASSWORD | docker login -u $CAR_OCI_REGISTRY_USERNAME --password-stdin $CAR_OCI_REGISTRY_HOST
+    - docker info
+
+docker_build:
+  stage: build
+  extends: .docker_common
+  script:
+    # The docker image tag is:
+    #  * The git tag (without the initial "v") if building a git tag
+    #  * "latest" when building the master branch
+    #  * Other branches do not yield a docker image
+    - IMAGE_NAME=$CI_PROJECT_TITLE
+    - BRANCH=${CI_COMMIT_TAG:-${CI_COMMIT_BRANCH}}
+    - bash ./docker/docker-build.sh $CAR_OCI_REGISTRY_HOST/$IMAGE_NAME:dev-$CI_COMMIT_SHORT_SHA .
+

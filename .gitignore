@@ -1,6 +1,8 @@
 docs/build/*
 .vscode
-build
+build/
 MANIFEST.skao.int
 PrivateRules.mak
 *.gpg.key
+Testing/
+profile-clang-*

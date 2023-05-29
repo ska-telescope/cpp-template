@@ -1,63 +1,61 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.26)
+project(ska_cpp_template C CXX)
 
-message(STATUS "Building ...")
+# Options
+option(ENABLE_CPPCORO   "Add CppCoro support?" OFF)
+option(ENABLE_CUDA      "Add Cuda support?" OFF)
 
-# Project configuration, specifying version, languages,
-# and the C++ standard to use for the whole project
-project(${PACKAGE_NAME} VERSION ${VERSION} DESCRIPTION ${DESCRIPTION} LANGUAGES CXX )
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# CMake 3.26 Experimental
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "2182bf5c-ef0d-489a-91da-49dbc3090d2a")
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/resources/cmake-modules)
-include(dependencies)
-include(lint)
-include(CTest)
-
-# External projects
-if (BUILD_TESTING)
-  add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
-# installed as git submodule - if this is your first clone you need to
-# git submodule init
-# git submodule update
-# This is a cmake module and needs no further input from you
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.0)
+    message(FATAL_ERROR "Only Clang 16.0.0 and greater supported for modules")
+  endif()
+  include(cmake/clang_modules.cmake)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  include(cmake/gcc_modules.cmake)
 endif()
 
-find_dependencies()
+# Ninja has a bug where color terminal isnt detected when piping
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(src/ska/helloworld)
-add_subdirectory(src/apps)
+if(ENABLE_CUDA)
+  set(CMAKE_CUDA_HOST_COMPILER clang)
+  set(CMAKE_CUDA_ARCHITECTURES 86)
+  enable_language(CXX CUDA)
+else()
+  enable_language(CXX)
+endif()
 
-# Install cmake config + version + target files
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  cmake/HelloWorldConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake"
-  INSTALL_DESTINATION
-    share/helloworld/cmake
-)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake"
-  COMPATIBILITY
-    AnyNewerVersion
-)
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HelloWorldVersion.cmake
-  DESTINATION
-    share/helloworld/cmake
-  COMPONENT
-    dev
-)
-install(EXPORT helloworld-targets
-  FILE
-    HelloWorldTargets.cmake
-  DESTINATION
-    share/helloworld/cmake
-  COMPONENT
-    dev
-  NAMESPACE
-    helloworld::
-)
+# Conan
+get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(isMultiConfig)
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake) # Include Conan-generated file
+else()
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include Conan-generated file
+endif()
+conan_basic_setup(TARGETS) # Introduce Conan-generated targets
 
-# Deb Packing
-include(Packing)
+
+add_subdirectory(modules/stdcxx)
+add_subdirectory(modules/range-v3)
+add_subdirectory(modules/fmt)
+add_subdirectory(modules/eigen)
+add_subdirectory(modules/ut)
+if(ENABLE_CPPCORO)
+  add_subdirectory(modules/cppcoro)
+endif()
+if(ENABLE_CUDA)
+  add_subdirectory(modules/cuda)
+endif()
+
+add_subdirectory(ska-cpp-template/foobar)
+add_subdirectory(ska-cpp-template/helloworld)
+
+enable_testing()
+list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
