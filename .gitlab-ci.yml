@@ -8,7 +8,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: normal
 
 .src_dir_ref_storage: &src_dir_ref_storage
-  - mkdir build || true
+  - mkdir -p build
   - pwd > build/original_source_directory
 
 .src_dir_ref_replacement: &src_dir_ref_replacement
@@ -73,21 +73,25 @@ build_debug:
     - *build_packages
     - *src_dir_ref_storage
   script:
-    - mkdir -p build/clang
-    - run conan==1.60.0 install . -g cmake_multi -if build/clang -s build_type=Debug --build=missing --profile=profile-clang-debian.txt
-    - cmake -B build/clang -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
-    - cmake --build build/clang --config Debug
+    - mkdir -p build
+    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
+    - cmake --build build --config Debug
   allow_failure: true
 
-# build_release:
-#   extends: .common.artifact-builder
-#   stage: build
-#   script:
-#     - apt update -y && apt install -y build-essential
-#     - cd build
-#     - cmake .. -DCMAKE_BUILD_TYPE=Release
-#     - make
-#   allow_failure: true
+build_release:
+  extends: .common
+  stage: build
+  before_script:
+    - apt update
+    - *build_packages
+    - *src_dir_ref_storage
+  script:
+    - mkdir -p build
+    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Release --build=missing --profile=profile-clang.txt
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17
+    - cmake --build build --config Release
+  allow_failure: true
 
 .docker_common:
   image: docker:stable
