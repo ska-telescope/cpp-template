@@ -1,0 +1,56 @@
+FROM debian:bookworm
+
+# LLVM 7
+RUN apt update && apt install -y lsb-release wget software-properties-common gnupg
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+RUN apt update && apt install -y clang-17 clang-tools-17 libc++-17-dev libc++abi-17-dev
+# replace broken symlinks
+# /usr/lib/clang/17/include -> ../../llvm-17/lib/clang/17.0.0/include
+# /usr/lib/clang/17/lib -> ../../llvm-17/lib/clang/17.0.0/lib
+RUN ln -s ../../llvm-17/lib/clang/17/include /usr/lib/clang/17/include --force
+RUN ln -s ../../llvm-17/lib/clang/17/lib /usr/lib/clang/17/lib --force
+
+# CMake 3.26
+RUN apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
+RUN bash ./cmake-3.26.4-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
+
+# Extra Packages
+RUN apt update && apt install -y python3-pip ninja-build pipx
+
+RUN python3 -u /usr/bin/run-clang-tidy-17.py -quiet 2>&1 | tee clang-tidy.log || FAILED=true
+
+# Patch Conan settings
+RUN pipx run conan==1.60.0 config init
+RUN apt install -y jq
+RUN pipx run yq '.compiler.clang.version += [ "17" ]' /root/.conan/settings.yml -i -Y
+
+# Build Conan packages
+WORKDIR ska-cpp-modules-template
+COPY conanfile.txt profile-clang.txt /ska-cpp-modules-template/
+RUN mkdir -p build/clang
+RUN pipx run conan==1.60.0 install . -g cmake_multi -if build/clang -s build_type=Debug --build=missing --profile=profile-clang.txt
+
+# Build Project
+COPY . /ska-cpp-modules-template
+RUN cmake -B build/clang -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+RUN cmake --build build/clang --config Debug -j8
+
+# install lint tools
+RUN apt install -y clang-tidy-17 moreutils
+
+#RUN jq '[ . - map(select(.output | contains("/RelWithDebInfo/"))) | .[] ]' build/clang/compile_commands.json | sponge build/clang/compile_commands.json
+
+# fix exports to include modmap
+RUN jq '[ .[] | . + {"command": (.command + " @" + .output + ".modmap")} ]' build/clang/compile_commands.json | sponge build/clang/compile_commands.json
+# RUN jq '[ .[] | . + {"command": ((.command | split(" ")[:10]) + ["@" + .output + ".modmap"] + (.command | split(" ")[10:])) | join(" ")} ]' build/clang/compile_commands.json | sponge build/clang/compile_commands.json
+
+# need CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
+RUN run-clang-tidy-17.py -p build/clang -quiet 2>&1 | tee clang-tidy.log
+
+
+# # Test
+# CMD ctest --test-dir build/clang -C Debug --output-on-failure
+
+# .["command"] | split(" ") + ["hello"]
