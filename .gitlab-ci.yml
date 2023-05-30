@@ -33,7 +33,7 @@ variables:
 stages:
   - build
   - test
-  # - linting
+  - lint
   # - pages
   # - publish
 
@@ -63,6 +63,9 @@ stages:
   - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
   - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
   - apt update && apt install -y libc++-17-dev libc++abi-17-dev
+  # CMake
+  - apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
+  - bash ./cmake-3.26.4-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
 
 .docker_common:
   image: docker:stable
@@ -89,7 +92,7 @@ build_debug:
     - mkdir -p build
     - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
     - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
-    - cmake --build build --config Debug
+    - cmake --build build --config Debug -j2
 
 build_release:
   extends: .common
@@ -102,7 +105,7 @@ build_release:
     - mkdir -p build
     - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Release --build=missing --profile=profile-clang.txt
     - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17
-    - cmake --build build --config Release
+    - cmake --build build --config Release -j2
 
 docker_build:
   stage: build
@@ -127,6 +130,25 @@ test_debug:
     - *test_packages
     - *src_dir_ref_replacement
   script:
-    ./build/ska-cpp-template/foobar/tests/Debug/foobar_tests
+    ctest --test-dir build -C Debug --output-on-failure
   timeout: 30m
   allow_failure: true
+
+# Lint
+
+lint_clang_tidy:
+  extends: .common
+  stage: lint
+  needs: ["build_debug"]
+  before_script:
+    - apt update
+    - *build_packages
+    - *src_dir_ref_replacement
+  script:
+    - apt install -y clang-tidy-17 moreutils
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    # - jq '[ . - map(select(.output | contains("/RelWithDebInfo/"))) | .[] ]' compile_commands.json | sponge compile_commands.json
+    - jq '[ .[] | . + {"command":(.command + " @" + .output + ".modmap")} ]' build/clang/compile_commands.json | sponge build/clang/compile_commands.json
+    - run-clang-tidy-17.py -p build -quiet 2>&1 | tee build/clang-tidy.log || FAILED=true
+    - cat build/clang-tidy.log | python3 .clang-tidy-to-junit.py $PWD/ clang-tidy > build/clang-tidy-junit.xml
+    - if [ $FAILED ]; then exit 1; fi
