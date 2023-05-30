@@ -3,14 +3,14 @@ FROM debian:bookworm
 # LLVM 7
 RUN apt update && apt install -y lsb-release wget software-properties-common gnupg
 RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
-RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
+RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+RUN add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
 RUN apt update && apt install -y clang-17 clang-tools-17 libc++-17-dev libc++abi-17-dev
 # replace broken symlinks
 # /usr/lib/clang/17/include -> ../../llvm-17/lib/clang/17.0.0/include
 # /usr/lib/clang/17/lib -> ../../llvm-17/lib/clang/17.0.0/lib
-RUN cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/include include --force
-RUN cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/lib lib --force
+RUN ln -s ../../llvm-17/lib/clang/17/include /usr/lib/clang/17/include --force
+RUN ln -s ../../llvm-17/lib/clang/17/lib /usr/lib/clang/17/lib --force
 
 # CMake 3.26
 RUN apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh

@@ -24,37 +24,28 @@ variables:
     \)
     -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
-.common: {tags: [k8srunner]}
-
-.common.artifact-builder:
-  extends: .common
-  before_script:
-    - *src_dir_ref_storage
+.common:
+  tags: [k8srunner]
   artifacts:
     paths:
       - build
 
-.common.artifact-retriever:
-  extends: .common
-  before_script:
-    - *src_dir_ref_replacement
-
 stages:
   - build
-  # - test
+  - test
   # - linting
   # - pages
   # - publish
 
 .build_packages: &build_packages
-  # LLVM7
+  # LLVM-7
   - apt install -y lsb-release wget software-properties-common gnupg
   - wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
-  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/  llvm-toolchain main'
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
   - apt update && apt install -y clang-17 clang-tools-17 libc++-17-dev libc++abi-17-dev
-  - cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/include include --force
-  - cd /usr/lib/clang/17 && ln -s ../../llvm-17/lib/clang/17/lib lib --force
+  - ln -s ../../llvm-17/lib/clang/17/include /usr/lib/clang/17/include --force
+  - ln -s ../../llvm-17/lib/clang/17/lib /usr/lib/clang/17/lib --force
   # CMake
   - apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
   - bash ./cmake-3.26.4-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
@@ -65,33 +56,13 @@ stages:
   - apt install -y jq
   - pipx run yq '.compiler.clang.version += [ "17" ]' /root/.conan/settings.yml -i -Y
 
-build_debug:
-  extends: .common
-  stage: build
-  before_script:
-    - apt update
-    - *build_packages
-    - *src_dir_ref_storage
-  script:
-    - mkdir -p build
-    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
-    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
-    - cmake --build build --config Debug
-  allow_failure: true
-
-build_release:
-  extends: .common
-  stage: build
-  before_script:
-    - apt update
-    - *build_packages
-    - *src_dir_ref_storage
-  script:
-    - mkdir -p build
-    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Release --build=missing --profile=profile-clang.txt
-    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17
-    - cmake --build build --config Release
-  allow_failure: true
+.test_packages: &test_packages
+  # LLVM-7
+  - apt install -y lsb-release wget software-properties-common gnupg
+  - wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+  - add-apt-repository -y 'deb http://apt.llvm.org/unstable/ llvm-toolchain main'
+  - apt update && apt install -y libc++-17-dev libc++abi-17-dev
 
 .docker_common:
   image: docker:stable
@@ -105,6 +76,34 @@ build_release:
     - echo $CAR_OCI_REGISTRY_PASSWORD | docker login -u $CAR_OCI_REGISTRY_USERNAME --password-stdin $CAR_OCI_REGISTRY_HOST
     - docker info
 
+# Build
+
+build_debug:
+  extends: .common
+  stage: build
+  before_script:
+    - apt update
+    - *build_packages
+    - *src_dir_ref_storage
+  script:
+    - mkdir -p build
+    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
+    - cmake --build build --config Debug
+
+build_release:
+  extends: .common
+  stage: build
+  before_script:
+    - apt update
+    - *build_packages
+    - *src_dir_ref_storage
+  script:
+    - mkdir -p build
+    - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Release --build=missing --profile=profile-clang.txt
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17
+    - cmake --build build --config Release
+
 docker_build:
   stage: build
   extends: .docker_common
@@ -117,3 +116,17 @@ docker_build:
     - BRANCH=${CI_COMMIT_TAG:-${CI_COMMIT_BRANCH}}
     - bash ./docker/docker-build.sh $CAR_OCI_REGISTRY_HOST/$IMAGE_NAME:dev-$CI_COMMIT_SHORT_SHA .
 
+# Test
+
+test_debug:
+  extends: .common
+  stage: test
+  needs: ["build_debug"]
+  before_script:
+    - apt update
+    - *test_packages
+    - *src_dir_ref_replacement
+  script:
+    ./build/ska-cpp-template/foobar/tests/Debug/foobar_tests
+  timeout: 30m
+  allow_failure: true
