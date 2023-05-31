@@ -7,10 +7,10 @@ target_link_libraries(foobar PUBLIC fmt-modules)
 target_link_libraries(foobar PUBLIC range-v3-modules)
 
 if(ENABLE_CUDA)
-target_link_libraries(foobar PUBLIC cuda-modules)
+    target_link_libraries(foobar PUBLIC cuda-modules)
 endif()
 if(ENABLE_CPPCORO)
-target_link_libraries(foobar PUBLIC cppcoro-modules)
+    target_link_libraries(foobar PUBLIC cppcoro-modules)
 endif()
 
 target_sources(foobar PUBLIC
@@ -38,5 +38,4 @@ if(ENABLE_CUDA)
     )
 endif()
 
-enable_testing()
 add_subdirectory(tests)

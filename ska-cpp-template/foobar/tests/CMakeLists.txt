@@ -27,5 +27,4 @@ if(ENABLE_CPPCORO)
     )
 endif()
 
-enable_testing()
 add_test(NAME ${TARGET_NAME} COMMAND foobar_tests)

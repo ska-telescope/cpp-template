@@ -130,9 +130,12 @@ test_debug:
     - *test_packages
     - *src_dir_ref_replacement
   script:
-    ctest --test-dir build -C Debug --output-on-failure
+    - ctest -C Debug -T test --test-dir build --no-compress-output --verbose
   timeout: 30m
-  allow_failure: true
+  allow_failure: false
+  artifacts:
+    paths:
+      - ./build
 
 # Lint
 
@@ -148,7 +151,6 @@ lint_clang_tidy:
     - apt install -y clang-tidy-17 moreutils
     - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
     - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    # - jq '[ . - map(select(.output | contains("/RelWithDebInfo/"))) | .[] ]' compile_commands.json | sponge compile_commands.json
     - jq '[ .[] | . + {"command":(.command + " @" + .output + ".modmap")} ]' build/compile_commands.json | sponge build/compile_commands.json
     - run-clang-tidy-17.py -p build -quiet 2>&1 | tee build/clang-tidy.log || FAILED=true
     - cat build/clang-tidy.log | python3 .clang-tidy-to-junit.py $PWD/ clang-tidy > build/clang-tidy-junit.xml
