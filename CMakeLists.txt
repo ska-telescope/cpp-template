@@ -54,8 +54,6 @@ if(ENABLE_CUDA)
   add_subdirectory(modules/cuda)
 endif()
 
+enable_testing()
 add_subdirectory(ska-cpp-template/foobar)
 add_subdirectory(ska-cpp-template/helloworld)
-
-enable_testing()
-list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")

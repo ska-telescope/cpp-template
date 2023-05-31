@@ -34,7 +34,7 @@ stages:
   - build
   - test
   - lint
-  # - pages
+  - pages
   # - publish
 
 .build_packages: &build_packages
@@ -66,6 +66,11 @@ stages:
   # CMake
   - apt install wget && wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
   - bash ./cmake-3.26.4-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
+  # Reporting
+  - apt install -y curl xsltproc
+  - curl https://gitlab.com/ska-telescope/ska-cicd-cpp-build-base/-/raw/master/images/ska-cicd-cpp-build-base/ctest2junit > /usr/local/bin/ctest2junit
+  - mkdir -p /usr/local/share/ctest2junit
+  - curl https://gitlab.com/ska-telescope/ska-cicd-cpp-build-base/-/raw/master/images/ska-cicd-cpp-build-base/ctest2junit.xsl > /usr/local/share/ctest2junit/ctest2junit.xsl
 
 .docker_common:
   image: docker:stable
@@ -91,7 +96,7 @@ build_debug:
   script:
     - mkdir -p build
     - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
-    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage"
+    - cmake -B build -G "Ninja Multi-Config" -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17 -DCONAN_COMPILER=clang -DCONAN_COMPILER_VERSION=17 -DCMAKE_CXX_FLAGS="-ftest-coverage" -DCMAKE_EXE_LINKER_FLAGS="-ftest-coverage"
     - cmake --build build --config Debug -j2
 
 build_release:
@@ -131,11 +136,18 @@ test_debug:
     - *src_dir_ref_replacement
   script:
     - ctest -C Debug -T test --test-dir build --no-compress-output --verbose
+  after_script:
+    - *src_dir_ref_storage
+    - cd build
+    - mkdir -p reports
+    - ctest2junit > reports/unit-tests.xml
   timeout: 30m
   allow_failure: false
   artifacts:
     paths:
       - ./build
+    reports:
+      junit: build/reports/unit-tests.xml
 
 # Lint
 
@@ -146,7 +158,7 @@ lint_clang_tidy:
   before_script:
     - apt update
     - *build_packages
-    - *src_dir_ref_storage
+    - *src_dir_ref_replacement
   script:
     - apt install -y clang-tidy-17 moreutils
     - pipx run conan==1.60.0 install . -g cmake_multi -if build -s build_type=Debug --build=missing --profile=profile-clang.txt
@@ -162,3 +174,35 @@ lint_clang_tidy:
       - build
     reports:
       junit: build/clang-tidy-junit.xml
+
+# Pages
+
+pages:
+  extends: .common
+  stage: pages
+  dependencies:
+    - lint_clang_tidy
+    - test_debug
+  before_script:
+    - apt update
+    - *test_packages
+    - *src_dir_ref_replacement
+  script:
+    - apt install -y gcovr llvm-17
+    - mkdir -p .public/build/reports
+    - cd .public
+    - gcovr --gcov-executable "llvm-cov-17 gcov" -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --html --html-details -o index.html
+    - gcovr --gcov-executable "llvm-cov-17 gcov" -r ../ -e '.*/resources/.*' -e '.*/CompilerIdCXX/.*' -e '.*/tests/.*' --xml -o build/reports/code-coverage.xml
+    - cp ../build/reports/unit-tests.xml build/reports/unit-tests.xml
+    - cp build/reports/code-coverage.xml ../build/reports/code-coverage.xml
+    # Create artifacts
+    - cd ..
+    - mv .public public
+  after_script:
+    - cp build/clang-tidy-junit.xml build/reports/clang-tidy-junit.xml
+    - cp build/clang-tidy-junit.xml linting.xml
+  allow_failure: true
+  artifacts:
+    paths:
+      - public
+      - build
