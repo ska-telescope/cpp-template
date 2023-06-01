@@ -1,12 +1,15 @@
 
-import foo;
-import bar;
+import foobar.foo;
+import foobar.bar;
+import fmt.core;
+import stdcxx;
 
 int main(int argc, char** argv)
 {
+    fmt::print("Hello World!");
     foo f;
-    f.print();
+    fmt::print("foo: {}", f.fibonacci_str<long>(10));
     bar b;
-    b.print();
+    fmt::print("bar: {}", b.get());
     return 0;
 }

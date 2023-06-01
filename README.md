@@ -18,3 +18,7 @@ the depedencies.txt file and uses the CMake find_package() functionality to
 locate it on your machine.
 
 
+## Issues
+
+* std::regex does not link, required in newer boost-ext-ut
+* missing gherkin implementations get ignored, needs a pedantic mode?

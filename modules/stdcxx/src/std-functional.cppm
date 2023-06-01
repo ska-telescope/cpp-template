@@ -3,13 +3,18 @@ module;
 export module stdcxx:functional;
 export namespace std {
     using std::function;
+    // using std::move_only_function;
+    using std::mem_fn;
+    using std::reference_wrapper;
+    using std::unwrap_reference;
+    using std::unwrap_ref_decay;
+
     using std::invoke;
     using std::bind;
     
     using std::ref;
     using std::cref;
 
-    using std::mem_fn;
 
     using std::operator==;
 }

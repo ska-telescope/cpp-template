@@ -34,4 +34,10 @@ export namespace ranges
 
     using ranges::begin;
     using ranges::end;
+    using ranges::distance;
+    using ranges::front;
+    using ranges::index;
+    
+    
+    using ranges::to;
 };

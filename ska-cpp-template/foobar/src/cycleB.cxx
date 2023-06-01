@@ -6,5 +6,5 @@ class cycleA;
 export class cycleB {
 public:
     std::string name() const { return "cycleB"; }
-    void f(cycleA& a);
+    std::string concat_names(cycleA& a);
 };

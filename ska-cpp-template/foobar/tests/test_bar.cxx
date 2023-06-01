@@ -1,6 +1,6 @@
 
 import boost.ut;
-import bar;
+import foobar.bar;
 import stdcxx;
 
 using namespace boost::ut;
@@ -13,8 +13,8 @@ suite bar_suite = [] {
         bar b;
         expect(b.name() == "bar");
     };
-    "print"_test = [] {
+    "get"_test = [] {
         bar b;
-        b.print();
+        expect(b.get() == 1_i);
     };
 };

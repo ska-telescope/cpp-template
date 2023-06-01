@@ -1,62 +1,59 @@
-export module foo;
+export module foobar.foo;
 
+import foobar.fibonacci;
 import range_v3;
 import stdcxx;
 
-template<std::integral T>
-ranges::experimental::generator<T> fibonacci()
-{
-    // a:b tends to the golden ratio,
-    // t.f. max_n ~= log_phi(numeric_max)
-    T max_n = 1 + std::log2(std::numeric_limits<T>::max())
-                    / std::log2(std::numbers::phi_v<float>);
-
-    T a=0, b=1;
-    co_yield a;
-    co_yield b;
-    for (auto n : ranges::iota_view(0, max_n))
-    {
-        T s=a+b;
-        co_yield s;
-        a=b;
-        b=s;
-    }
-}
-
+// See https://www.walletfox.com/course/quickref_range_v3.php
 export class foo
 {
 public:
   foo() = default;
   ~foo() = default;
+
   std::string name() const { return "foo"; }
-  void print();
+
+  std::string std_range_str(int start, int end) const
+  {
+    std::stringstream ss;
+    //views::intersperse
+    ss << "[";
+    for (auto x : std::views::iota(start, end))
+    {
+      ss << x << " ";
+    }
+    ss << "]";
+    return ss.str();
+  }
+
+  std::string ranges_range_str(int start, int end) const
+  {
+    std::stringstream ss;
+    ss << ranges::views::iota(start, end);
+    return ss.str();
+  }
+
+  template<typename T>
+  std::string ranges_range_str(std::vector<T> range) const
+  {
+    // // Ranges-v3
+    //ranges::views::all(range)
+    std::stringstream ss;
+    ss << "[";
+    for (auto x : range)
+    {
+      ss << x  << " ";
+    }
+    ss << "]";
+    return ss.str();
+  }
+
+  template<typename T>
+  std::string fibonacci_str(int count) const
+  {
+    std::stringstream ss;
+    auto fibrange = fibonacci<T>() | ranges::views::take(count) | ranges::to<std::vector<T>>();
+    ss << ranges::views::all(fibrange);
+    return ss.str();
+  }
 };
-
-void foo::print()
-{
-  //const std::regex pattern = std::regex("");
-  // // std ranges doesn't work in as many places as ranges-v3
-  // for (auto x : std::views::iota(0,10) | std::views::take(5))
-  // {
-  //   std::cout << x;
-  // }
-  // std::cout << "\n";
-
-  // // Ranges-v3
-  std::vector<int> v {1,2,3,4};
-  std::cout << ranges::views::all(v) << "\n";
-  
-  for (auto x : ranges::views::iota(0,10) | ranges::views::take(5))
-  {
-    std::cout << x;
-  }
-  std::cout << "\n";
-  std::cout << ranges::views::iota(0,10) << "\n";
-
-  // // Ranges-v3 Generator
-  for (auto i : fibonacci<long long>() | ranges::views::take(100))
-  {
-      std::cout << i << " ";
-  }
-  std::cout << "\n";
-}

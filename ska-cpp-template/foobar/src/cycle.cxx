@@ -5,12 +5,12 @@ import stdcxx;
 export import :A;
 export import :B;
 
-void cycleA::f(cycleB& b)
+std::string cycleA::concat_names(cycleB& b)
 {
-    std::cout << b.name() << "\n";
+    return name() + b.name();
 }
 
-void cycleB::f(cycleA& a)
+std::string cycleB::concat_names(cycleA& a)
 {
-    std::cout << a.name() << "\n";
+    return name() + a.name();
 }

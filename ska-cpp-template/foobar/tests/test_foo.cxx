@@ -1,18 +1,24 @@
 import boost.ut;
-import foo;
+import foobar.foo;
 
 using namespace boost::ut;
 
 suite foo_suite = [] {
-    "simple"_test = [] {
+    const foo f;
+
+    "simple"_test = [&] {
         expect(1 == 1_i);
     };
-    "name"_test = [] {
-        foo f;
+    "name"_test = [&] {
         expect(f.name() == "foo");
     };
-    "print"_test = [] {
-        foo f;
-        f.print();
+    "std_range_str"_test = [&] {
+        expect(f.std_range_str(0,5) == "[0 1 2 3 4 ]");
+    };
+    "ranges_range_str"_test = [&] {
+        expect(f.ranges_range_str(0,5) == "[0,1,2,3,4]");
+    };
+    "fibonacci_str"_test = [&] {
+        expect(f.fibonacci_str<long>(5) == "[0,1,1,2,3]");
     };
 };

@@ -7,6 +7,7 @@ export namespace ranges
 {
     using ranges::iota_view;
     using ranges::join_view;
+    using ranges::common_view;
     using ranges::drop_view;
     using ranges::view_facade;
     using ranges::operator==;

@@ -31,8 +31,13 @@ export import :variant;
 export import :optional;
 export import :unordered_map;
 export import :stack;
-export import :regex;
+
+// export import :comparison;
 // export import :initializer_list;
+export import :regex;
+
+export import :ranges;
+
 export import :limits;
 export import :numbers;
 

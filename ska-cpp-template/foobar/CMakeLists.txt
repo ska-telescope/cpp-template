@@ -23,6 +23,7 @@ target_sources(foobar PUBLIC
         src/cycle.cxx
         src/cycleA.cxx
         src/cycleB.cxx
+        src/fibonacci.cxx
 )
 
 if(ENABLE_CUDA)

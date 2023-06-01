@@ -13,6 +13,8 @@ target_sources(${TARGET_NAME} PUBLIC
     test_cycle.cxx
     test_bdd.cxx
     test_eigen.cxx
+    test_fibonacci.cxx
+    test_headers.cxx
 )
 if(ENABLE_CUDA)
     target_link_libraries(${TARGET_NAME} PUBLIC cuda-modules)

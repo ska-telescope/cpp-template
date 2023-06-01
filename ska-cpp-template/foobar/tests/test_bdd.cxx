@@ -26,6 +26,7 @@ suite bdd_suite = [] {
     };
   };
 
+  // NOTE: missing implementations are ignored
   "Vector"_test = steps |
     R"(
       Feature: Vector
